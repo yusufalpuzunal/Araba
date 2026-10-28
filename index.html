@@ -53,10 +53,9 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 #toast.off{opacity:0}
 
 .touch{position:fixed;inset:auto 0 0 0;height:46%;pointer-events:none}
-#steerPad{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));width:44%;height:100%;pointer-events:auto;touch-action:none}
-#steerPad .hint{position:absolute;left:8px;bottom:8px;font-family:var(--display);font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
-#steerRail{position:absolute;left:12px;right:12px;bottom:46px;height:4px;border-radius:2px;background:var(--line)}
-#steerKnob{position:absolute;bottom:26px;left:50%;width:44px;height:44px;margin-left:-22px;border-radius:50%;background:var(--glass-2);border:2px solid var(--amber)}
+#wheel{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:max(18px,env(safe-area-inset-bottom,0px));width:150px;height:150px;pointer-events:auto;touch-action:none;cursor:grab}
+#wheel svg{width:100%;height:100%;display:block;will-change:transform}
+#wheel.on svg{filter:brightness(1.25)}
 .pedals{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;gap:10px;pointer-events:auto;align-items:end}
 .pedals button{border:1px solid var(--line);background:var(--glass);border-radius:14px;font-family:var(--display);font-weight:700;letter-spacing:.08em;touch-action:none}
 .pedals button.on{background:var(--glass-2);border-color:var(--amber)}
@@ -132,7 +131,7 @@ body.touch .tools{max-width:220px}
 </div>
 
 <div class="touch" id="touch" hidden>
-  <div id="steerPad"><div id="steerRail"></div><div id="steerKnob"></div><span class="hint">Direksiyon · sürükle</span></div>
+  <div id="wheel" role="slider" aria-label="Direksiyon"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="rgba(13,17,23,.62)" stroke="#dfe4ec" stroke-width="7"/><circle cx="50" cy="50" r="44" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1.5" stroke-dasharray="2 4"/><path d="M50 50L10 60M50 50L90 60M50 50V91" stroke="#dfe4ec" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="50" r="12" fill="#dfe4ec"/><circle cx="50" cy="50" r="5" fill="#ffb22e"/><rect x="45" y="3" width="10" height="14" rx="3" fill="#ffb22e"/></svg></div>
   <div class="pedals">
     <button id="bHand" type="button">EL FRENİ</button>
     <button id="bBrake" type="button">FREN</button>
@@ -866,7 +865,8 @@ function buildCarModel(sp,paintHex){
   // interior
   const wsz=-(sp.wsX-.32);
   add(box(sp.cabW-.12,.16,.45).translate(0,sp.beltY+.0,wsz),CM.interior,false);
-  {const sw=add(new THREE.TorusGeometry(.17,.024,8,22),CM.black,false);sw.position.set(-.37,sp.beltY+.1,wsz+.36);sw.rotation.x=-.35}
+  const swPiv=new THREE.Group();swPiv.position.set(-.37,sp.beltY+.1,wsz+.36);swPiv.rotation.x=-.35;body.add(swPiv);const sw=new THREE.Group();swPiv.add(sw);
+  add(new THREE.TorusGeometry(.17,.024,8,22),CM.black,false,sw);add(new THREE.CylinderGeometry(.05,.05,.04,14).rotateX(Math.PI/2),CM.black,false,sw);add(box(.3,.03,.02),CM.black,false,sw);add(box(.03,.15,.02).translate(0,-.08,0),CM.black,false,sw);add(box(.03,.03,.012).translate(0,.165,.012),CM.amber,false,sw);
   const seatZ=-(sp.wsX-1.02);
   for(const sx of [-.37,.37]){add(box(.48,.12,.5).translate(sx,sp.yb+.36,seatZ),CM.seat,false);const bk=add(box(.48,.62,.12),CM.seat,false);bk.position.set(sx,sp.yb+.72,seatZ+.3);bk.rotation.x=-.18;add(box(.26,.16,.1).translate(sx,sp.yb+1.1,seatZ+.37),CM.seat,false)}
   if(sp.rearSeats){const rz=seatZ+.95;add(box(sp.cabW-.2,.12,.5).translate(0,sp.yb+.38,rz),CM.seat,false);const bk=add(box(sp.cabW-.2,.58,.12),CM.seat,false);bk.position.set(0,sp.yb+.72,rz+.28);bk.rotation.x=-.15}
@@ -937,7 +937,7 @@ function buildCarModel(sp,paintHex){
   const spots=[];
   for(const sx of [-1,1]){const s=new THREE.SpotLight(0xfff2dc,0,80,.5,.6,1.2);s.position.set(sx*sp.hl.x,sp.hl.y-sp.cgY,hf.z-.1);const t=new THREE.Object3D();t.position.set(sx*sp.hl.x*1.6,-1.6,-26);root.add(s,t);s.target=t;spots.push(s)}
   const glow=new THREE.PointLight(0xff1a0a,0,7,2);glow.position.set(0,sp.tl.y-sp.cgY,tr.z+.6);root.add(glow);
-  return {root,wheels,paint,spots,glow};
+  return {root,wheels,paint,spots,glow,sw};
 }
 
 /* ---------- physics ---------- */
@@ -1130,11 +1130,15 @@ function bindHold(el,key){const on=e=>{e.preventDefault();touchState[key]=true;e
   const off=()=>{touchState[key]=false;el.classList.remove('on')};
   el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('lostpointercapture',off)}
 bindHold($('bGas'),'gas');bindHold($('bBrake'),'brake');bindHold($('bHand'),'hand');
-{const pad=$('steerPad'),knob=$('steerKnob');let pid=null,x0=0;
-  pad.addEventListener('pointerdown',e=>{pid=e.pointerId;x0=e.clientX;try{pad.setPointerCapture(pid)}catch(_){}});
-  pad.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;touchState.steer=clamp((e.clientX-x0)/75,-1,1);knob.style.transform=`translateX(${touchState.steer*Math.min(90,pad.clientWidth*.35)}px)`});
-  const end=e=>{if(e.pointerId!==pid)return;pid=null;touchState.steer=0;knob.style.transform=''};
-  pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end)}
+// rotating steering wheel: drag around its centre, like a real wheel
+const WMAX=2.2;let wAng=0,wDrag=null;
+{const wh=$('wheel');
+  wh.addEventListener('pointerdown',e=>{e.preventDefault();const r=wh.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    wDrag={id:e.pointerId,cx,cy,a:Math.atan2(e.clientY-cy,e.clientX-cx)};wh.classList.add('on');try{wh.setPointerCapture(e.pointerId)}catch(_){}});
+  wh.addEventListener('pointermove',e=>{if(!wDrag||e.pointerId!==wDrag.id)return;const a=Math.atan2(e.clientY-wDrag.cy,e.clientX-wDrag.cx);let d=a-wDrag.a;d=Math.atan2(Math.sin(d),Math.cos(d));wDrag.a=a;wAng=clamp(wAng+d,-WMAX,WMAX)});
+  const end=e=>{if(!wDrag||e.pointerId!==wDrag.id)return;wDrag=null;wh.classList.remove('on')};
+  wh.addEventListener('pointerup',end);wh.addEventListener('pointercancel',end);wh.addEventListener('lostpointercapture',end)}
+const wheelSvg=$('wheel').firstElementChild;
 function readInput(dt){
   let thr=(keys.KeyW||keys.ArrowUp||touchState.gas)?1:0,brk=(keys.KeyS||keys.ArrowDown||touchState.brake)?1:0;
   let st=((keys.KeyD||keys.ArrowRight)?1:0)-((keys.KeyA||keys.ArrowLeft)?1:0);
@@ -1143,11 +1147,13 @@ function readInput(dt){
   for(const gp of gps){if(!gp)continue;const ax=gp.axes[0]||0;if(Math.abs(ax)>.12){st=ax;analog=true}
     const rt=gp.buttons[7]?gp.buttons[7].value:0,lt=gp.buttons[6]?gp.buttons[6].value:0;if(rt>.05)thr=Math.max(thr,rt);if(lt>.05)brk=Math.max(brk,lt);
     if(gp.buttons[0]&&gp.buttons[0].pressed)hand=true;break}
-  if(touchState.steer!==0){st=touchState.steer;analog=true}
+  if(wDrag){st=wAng/WMAX;analog=true}
   st=clamp(st,-1,1);
   if(analog)inp.steer=lerp(inp.steer,st,1-Math.exp(-dt*14));
   else{const rate=(Math.abs(st)>Math.abs(inp.steer)&&Math.sign(st)===Math.sign(inp.steer||st))?3.2:6;const d=st-inp.steer;inp.steer+=clamp(d,-rate*dt,rate*dt)}
   inp.throttle=thr;inp.brake=brk;inp.hand=hand;
+  if(!wDrag)wAng=inp.steer*WMAX;
+  wheelSvg.style.transform=`rotate(${wAng}rad)`;
 }
 
 /* ---------- game state ---------- */
@@ -1180,7 +1186,7 @@ function renderMenu(){
   const pa=$('paints');pa.innerHTML='';
   PAINTS.forEach(([n,h],i)=>{const b=document.createElement('button');b.type='button';b.className='sw';b.id='paint-'+i;b.title=n;b.setAttribute('aria-label',n);b.style.background=h;b.setAttribute('aria-pressed',i===paintIdx);
     b.onclick=()=>{paintIdx=i;model.paint.color.copy(C(h));renderMenu()};pa.appendChild(b)});
-  $('help').innerHTML=isTouch?'Sol alttaki alanda parmağını sağa sola sürükle: direksiyon. Sağda <b>GAZ</b>, <b>FREN</b> (durunca geri vites) ve <b>EL FRENİ</b> (drift). Üstte <b>Far</b>, <b>Gece</b> ve devrilen aracı düzelten <b>Kaldır</b> var.'
+  $('help').innerHTML=isTouch?'Sol alttaki direksiyonu parmağınla gerçek direksiyon gibi çevir. Sağda <b>GAZ</b>, <b>FREN</b> (durunca geri vites) ve <b>EL FRENİ</b> (drift). Üstte <b>Far</b>, <b>Gece</b> ve devrilen aracı düzelten <b>Kaldır</b> var.'
    :'<kbd>W</kbd>/<kbd>↑</kbd> gaz · <kbd>S</kbd>/<kbd>↓</kbd> fren ve geri · <kbd>A</kbd><kbd>D</kbd>/<kbd>←</kbd><kbd>→</kbd> direksiyon · <kbd>Boşluk</kbd> el freni · <kbd>L</kbd> farlar · <kbd>N</kbd> gece/gündüz · <kbd>C</kbd> kamera · <kbd>R</kbd> aracı kaldır · <kbd>M</kbd> ses · <kbd>Esc</kbd> garaj. Oyun kolu da çalışır.';
 }
 function openMenu(){menuOpen=true;$('menu').hidden=false;$('hud').hidden=true;$('touch').hidden=true;renderMenu();if(audio){audio.eg.gain.value=0}}
@@ -1246,7 +1252,7 @@ function frame(now){
   if(!menuOpen){acc+=dt;let n=0;while(acc>=DT&&n<8){car.step(DT,inp);acc-=DT;n++}if(n===8)acc=0}
   else{acc=0;car.v.multiplyScalar(.9);car.w.multiplyScalar(.9);car.step(DT,{throttle:0,brake:0,steer:0,hand:false})}
   const sp=car.sp,speed=car.v.length();
-  model.root.position.copy(car.p);model.root.quaternion.copy(car.q);
+  model.root.position.copy(car.p);model.root.quaternion.copy(car.q);model.sw.rotation.z=-wAng;
   car.wheels.forEach((wh,i)=>{const mw=model.wheels[i];const ext=clamp(wh.t-sp.R,0,sp.restLen);mw.piv.position.set(wh.pos.x,wh.pos.y-ext,wh.pos.z);
     mw.piv.rotation.y=wh.front?-car.steer:0;wh.spin-=wh.vl/sp.R*dt;mw.spin.rotation.x=wh.spin;
     if(!menuOpen&&wh.contact&&wh.slip>.6&&speed>1.5){const cur=[wh.cx,wh.cy,wh.cz];if(lastMark[i]){const a=lastMark[i];const dx=cur[0]-a[0],dz=cur[2]-a[2],l=Math.hypot(dx,dz);if(l>.35){if(l<3)addSkid(a,cur,-dz/l,dx/l);lastMark[i]=cur}}else lastMark[i]=cur}else lastMark[i]=null});
