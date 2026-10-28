@@ -148,7 +148,7 @@ body.touch .tools{max-width:220px}
     <div><div class="label">Saat</div><div class="timesel"><button id="mDay" type="button" aria-pressed="true">Gündüz</button><button id="mNight" type="button" aria-pressed="false">Gece</button></div></div>
     <button id="go" type="button">Sürmeye başla</button>
     <div class="help" id="help"></div>
-    <div class="fine">Markalar, modeller, plakalar ve dükkanlar bu oyun için uydurulmuştur.</div>
+    <div class="fine">Araç tasarımları ve dükkanlar bu oyun için uydurulmuştur.</div>
   </div>
 </div>
 
@@ -663,27 +663,82 @@ function buildWorld(){
 
 /* ---------- cars (fictional brands) ---------- */
 const CARS=[
- {brand:'Vela',model:'Corsa',type:'Spor coupe · arkadan itiş',hp:420,mass:1380,awd:false,tq:520,redline:7400,gears:[3.3,2.2,1.65,1.3,1.06,0.86],rev:3.2,final:3.7,
-  grip:1.2,offroad:.68,steer:.56,freq:1.9,restLen:.2,R:.34,track:1.64,wb:2.68,L:4.5,W:1.95,cgY:.46,drag:.52,down:.55,
-  yb:.27,beltY:.95,roofY:1.27,wsX:.55,tireW:.27,rim:'#c9ccd1',spokes:10,spokeW:.03,caliper:'#c4161c',plate:'34 VC 420',
-  upper:[[2.26,.36],[2.28,.52],[2.15,.66],[1.3,.8],[.5,.9],[-.6,.95],[-1.5,.98],[-2.05,1.0],[-2.25,.98],[-2.3,.75],[-2.28,.42]],
-  cabin:[[.62,.88],[-.2,1.21],[-.85,1.23],[-1.55,1.07],[-2.0,.98],[-1.9,.93],[.5,.88]],cabW:1.5,
-  roof:[[-.18,1.2],[-.88,1.22],[-.9,1.27],[-.17,1.25]],
-  hl:{x:.62,y:.6,w:.5},tl:{x:.6,y:.82,w:.55},plateF:.4,plateR:.6,doors:[.6,-.85],bX:-.82,exhaust:[-.55,-.42,.42,.55],rearSeats:false,extra:'wing'},
- {brand:'Ilgaz',model:'R4',type:'Ralli hatchback · 4 çeker',hp:310,mass:1240,awd:true,tq:430,redline:7000,gears:[3.0,2.1,1.6,1.28,1.05],rev:3.1,final:4.2,
-  grip:1.12,offroad:.93,steer:.6,freq:1.55,restLen:.28,R:.33,track:1.58,wb:2.55,L:4.1,W:1.84,cgY:.55,drag:.55,down:.25,
-  yb:.33,beltY:1.04,roofY:1.48,wsX:.8,tireW:.24,rim:'#f2f2f0',spokes:6,spokeW:.07,caliper:'#f2b705',plate:'06 IR 310',
+ {name:'Yusuf GT',type:'Gran turismo · arkadan itiş',plate:'34 YSF 61',hp:480,mass:1520,drive:'rwd',tq:600,redline:7200,gears:[3.2,2.15,1.6,1.25,1.0,0.82],rev:3.2,final:3.5,
+  grip:1.2,offroad:.68,steer:.58,freq:1.8,restLen:.2,R:.35,track:1.66,wb:2.8,L:4.7,W:1.96,cgY:.47,drag:.5,down:.45,esp:3.2,
+  yb:.28,beltY:.95,roofY:1.29,wsX:.6,tireW:.28,rim:'#c9ccd1',spokes:10,spokeW:.03,caliper:'#c4161c',
+  upper:[[2.33,.38],[2.35,.55],[2.22,.68],[1.4,.82],[.55,.9],[-.6,.96],[-1.6,.99],[-2.15,1.0],[-2.33,.97],[-2.37,.74],[-2.35,.43]],
+  cabin:[[.65,.88],[-.15,1.23],[-.95,1.25],[-1.75,1.05],[-2.1,.98],[-1.95,.94],[.5,.88]],cabW:1.52,
+  roof:[[-.12,1.22],[-.93,1.24],[-.95,1.29],[-.11,1.27]],
+  hl:{x:.64,y:.6,w:.52},tl:{x:.62,y:.82,w:.58},plateF:.42,plateR:.6,doors:[.62,-.9],bX:-.88,exhaust:[-.55,-.42,.42,.55],rearSeats:true,extra:'gt'},
+ {name:'Alperen 4x4',type:'Arazi aracı · 4 çeker',plate:'34 ALP 61',hp:300,mass:2150,drive:'awd',tq:600,redline:5800,gears:[4.2,2.6,1.7,1.25,1.0,0.8],rev:3.8,final:4.1,
+  grip:1.06,offroad:1.0,steer:.66,freq:1.25,restLen:.4,R:.43,track:1.66,wb:2.6,L:4.5,W:1.95,cgY:.82,drag:.85,down:0,esp:2.5,
+  yb:.62,beltY:1.3,roofY:1.98,wsX:1.12,tireW:.32,rim:'#2f3236',spokes:6,spokeW:.09,caliper:'#3a3d42',
+  upper:[[2.18,.72],[2.22,.95],[2.2,1.16],[1.2,1.26],[-.4,1.3],[-2.2,1.32],[-2.26,1.25],[-2.27,.72]],
+  cabin:[[1.15,1.24],[.75,1.92],[-2.1,1.94],[-2.2,1.32],[1.0,1.24]],cabW:1.78,
+  roof:[[.75,1.9],[-2.1,1.92],[-2.12,1.98],[.73,1.97]],
+  hl:{x:.66,y:1.02,w:.3,round:true},tl:{x:.8,y:1.0,w:.2},plateF:.8,plateR:.78,doors:[1.05,-.1,-1.25],bX:-.1,exhaust:[.6],rearSeats:true,extra:'offroad'},
+ {name:'Emin Coupe',type:'Kompakt coupe · arkadan itiş',plate:'54 EMN 054',hp:250,mass:1300,drive:'rwd',tq:340,redline:7200,gears:[3.4,2.2,1.6,1.25,1.0,0.82],rev:3.3,final:3.9,
+  grip:1.12,offroad:.72,steer:.6,freq:1.75,restLen:.22,R:.32,track:1.56,wb:2.6,L:4.35,W:1.82,cgY:.48,drag:.5,down:.2,esp:2.6,
+  yb:.28,beltY:.92,roofY:1.36,wsX:.62,tireW:.24,rim:'#a9adb3',spokes:5,spokeW:.06,caliper:'#2b2b2b',
+  upper:[[2.12,.38],[2.15,.56],[2.05,.7],[1.2,.83],[.6,.88],[-.5,.92],[-1.45,.95],[-1.55,1.0],[-2.05,1.02],[-2.18,.98],[-2.2,.78],[-2.17,.42]],
+  cabin:[[.68,.86],[-.1,1.3],[-.95,1.32],[-1.5,.98],[-1.4,.94],[.55,.86]],cabW:1.48,
+  roof:[[-.07,1.29],[-.93,1.31],[-.95,1.36],[-.06,1.34]],
+  hl:{x:.58,y:.6,w:.48},tl:{x:.6,y:.86,w:.5},plateF:.42,plateR:.62,doors:[.62,-.8],bX:-.8,exhaust:[-.6,.6],rearSeats:true,extra:'lip'},
+ {name:'Hamza S81',type:'Spor sedan · arkadan itiş',plate:'81 HMZ 61',hp:380,mass:1650,drive:'rwd',tq:500,redline:7000,gears:[3.3,2.15,1.6,1.25,1.0,0.82],rev:3.2,final:3.6,
+  grip:1.15,offroad:.72,steer:.58,freq:1.7,restLen:.22,R:.34,track:1.6,wb:2.9,L:4.85,W:1.88,cgY:.5,drag:.52,down:.3,esp:3,
+  yb:.3,beltY:.97,roofY:1.46,wsX:.76,tireW:.26,rim:'#55595f',spokes:10,spokeW:.04,caliper:'#1f4fa3',
+  upper:[[2.4,.4],[2.43,.58],[2.32,.72],[1.4,.86],[.75,.92],[-.6,.98],[-1.75,1.0],[-1.85,1.05],[-2.3,1.06],[-2.42,1.02],[-2.44,.8],[-2.4,.45]],
+  cabin:[[.82,.9],[-.05,1.4],[-1.15,1.42],[-1.8,1.03],[-1.7,.98],[.7,.9]],cabW:1.52,
+  roof:[[-.02,1.39],[-1.13,1.41],[-1.15,1.46],[0,1.44]],
+  hl:{x:.6,y:.64,w:.5},tl:{x:.62,y:.9,w:.55},plateF:.44,plateR:.66,doors:[.75,-.35,-1.45],bX:-.35,exhaust:[-.6,-.48,.48,.6],rearSeats:true,extra:'lip'},
+ {name:'Kaan Corsa',type:'Şehir hatchback · önden çekiş',plate:'41 KAN 41',hp:130,mass:1100,drive:'fwd',tq:210,redline:6500,gears:[3.6,2.1,1.4,1.05,0.85],rev:3.5,final:4.0,
+  grip:1.06,offroad:.78,steer:.64,freq:1.6,restLen:.24,R:.31,track:1.5,wb:2.5,L:3.95,W:1.76,cgY:.52,drag:.55,down:0,esp:2.4,
+  yb:.3,beltY:1.0,roofY:1.5,wsX:.86,tireW:.21,rim:'#c3c6ca',spokes:8,spokeW:.05,caliper:'#3a3d42',
+  upper:[[1.95,.4],[1.98,.6],[1.88,.75],[.85,.92],[-.4,1.0],[-1.85,1.04],[-1.98,.98],[-2.0,.46]],
+  cabin:[[.9,.9],[.05,1.45],[-1.62,1.47],[-1.92,1.04],[-1.8,1.0],[.8,.9]],cabW:1.5,
+  roof:[[.08,1.43],[-1.62,1.45],[-1.64,1.5],[.1,1.49]],
+  hl:{x:.56,y:.7,w:.42},tl:{x:.64,y:.95,w:.3},plateF:.45,plateR:.62,doors:[.88,-.1,-1.05],bX:-.1,exhaust:[.45],rearSeats:true,extra:'hatch'},
+ {name:'Yusra Sport',type:'Üstü açık roadster · arkadan itiş',plate:'41 YSR 41',hp:300,mass:1150,drive:'rwd',tq:380,redline:7500,gears:[3.3,2.2,1.65,1.3,1.06,0.86],rev:3.2,final:3.9,
+  grip:1.16,offroad:.7,steer:.6,freq:1.85,restLen:.2,R:.32,track:1.55,wb:2.45,L:4.1,W:1.8,cgY:.44,drag:.48,down:.2,esp:2.8,open:true,
+  yb:.27,beltY:.88,roofY:1.15,wsX:.38,tireW:.25,rim:'#d8dadd',spokes:5,spokeW:.07,caliper:'#e0661a',
+  upper:[[2.0,.36],[2.03,.53],[1.92,.66],[1.0,.8],[.3,.86],[-.9,.88],[-1.6,.9],[-1.95,.9],[-2.05,.86],[-2.07,.68],[-2.05,.42]],
+  cabin:[[.42,.85],[-.03,1.15],[-.09,1.14],[.33,.85]],cabW:1.45,roof:null,
+  hl:{x:.58,y:.6,w:.44},tl:{x:.6,y:.78,w:.4},plateF:.42,plateR:.58,doors:[.3,-.75],bX:-.8,exhaust:[-.5,.5],rearSeats:false,extra:'roadster'},
+ {name:'Ali 911',type:'Klasik kas arabası · arkadan itiş',plate:'34 ALI 34',hp:450,mass:1600,drive:'rwd',tq:640,redline:6200,gears:[2.9,1.9,1.4,1.1,0.9],rev:3.0,final:3.5,
+  grip:1.08,offroad:.7,steer:.55,freq:1.5,restLen:.25,R:.34,track:1.58,wb:2.75,L:4.75,W:1.92,cgY:.52,drag:.6,down:.05,esp:2.2,
+  yb:.3,beltY:.92,roofY:1.32,wsX:.68,tireW:.27,rim:'#e6e8ea',spokes:5,spokeW:.08,caliper:'#2b2b2b',
+  upper:[[2.35,.42],[2.38,.64],[2.3,.74],[.85,.88],[-.2,.92],[-1.1,.95],[-2.25,.98],[-2.38,.95],[-2.4,.7],[-2.37,.46]],
+  cabin:[[.75,.86],[.05,1.26],[-.65,1.28],[-2.2,.97],[-2.0,.93],[.62,.86]],cabW:1.5,
+  roof:[[.08,1.25],[-.63,1.27],[-.65,1.32],[.07,1.3]],
+  hl:{x:.62,y:.6,w:.26,round:true},tl:{x:.52,y:.8,w:.66},plateF:.32,plateR:.52,doors:[.7,-.95],bX:-.9,exhaust:[-.62,.62],rearSeats:true,extra:'muscle'},
+ {name:'Atlas X5',type:'Aile SUV · 4 çeker',plate:'34 ATL 34',hp:340,mass:2050,drive:'awd',tq:580,redline:6200,gears:[3.8,2.4,1.6,1.2,1.0,0.8],rev:3.5,final:3.9,
+  grip:1.08,offroad:.95,steer:.64,freq:1.4,restLen:.34,R:.4,track:1.7,wb:2.85,L:4.75,W:1.98,cgY:.72,drag:.75,down:.1,esp:2.6,
+  yb:.5,beltY:1.27,roofY:1.86,wsX:1.1,tireW:.3,rim:'#7d838a',spokes:6,spokeW:.08,caliper:'#9aa0a6',
+  upper:[[2.36,.62],[2.4,.85],[2.36,1.08],[1.15,1.22],[-.5,1.27],[-2.3,1.3],[-2.42,1.22],[-2.42,.62]],
+  cabin:[[1.15,1.2],[.3,1.8],[-2.15,1.82],[-2.33,1.3],[1.0,1.2]],cabW:1.74,
+  roof:[[.32,1.78],[-2.15,1.8],[-2.15,1.86],[.3,1.85]],
+  hl:{x:.68,y:.95,w:.48},tl:{x:.74,y:1.05,w:.28},plateF:.7,plateR:.8,doors:[1.1,0,-1.18],bX:0,exhaust:[-.62,-.48],rearSeats:true,extra:'rails'},
+ {name:'Tuna XL',type:'Çift kabin pikap · 4 çeker',plate:'34 TUN 34',hp:400,mass:2300,drive:'awd',tq:700,redline:5800,gears:[4.0,2.5,1.65,1.25,1.0,0.78],rev:3.8,final:3.7,
+  grip:1.06,offroad:.97,steer:.68,freq:1.3,restLen:.38,R:.41,track:1.72,wb:3.2,L:5.3,W:1.98,cgY:.8,drag:.85,down:0,esp:2.6,
+  yb:.58,beltY:1.3,roofY:1.98,wsX:1.45,tireW:.3,rim:'#b9bdc2',spokes:6,spokeW:.07,caliper:'#3a3d42',
+  upper:[[2.6,.7],[2.65,.95],[2.62,1.15],[1.5,1.28],[.95,1.3],[-.95,1.32],[-1.0,.95],[-2.6,.95],[-2.65,.95],[-2.66,.7]],
+  cabin:[[1.5,1.26],[.75,1.92],[-.9,1.94],[-.98,1.32],[1.3,1.26]],cabW:1.78,
+  roof:[[.75,1.9],[-.9,1.92],[-.92,1.98],[.73,1.97]],
+  hl:{x:.7,y:1.0,w:.5},tl:{x:.88,y:.85,w:.14},plateF:.76,plateR:.78,doors:[1.4,.25,-.95],bX:.25,exhaust:[.7],rearSeats:true,extra:'pickup'},
+ {name:'Ege 21R',type:'Ralli hatchback · 4 çeker',plate:'34 EGE 34',hp:310,mass:1240,drive:'awd',tq:430,redline:7000,gears:[3.0,2.1,1.6,1.28,1.05],rev:3.1,final:4.2,
+  grip:1.12,offroad:.93,steer:.62,freq:1.55,restLen:.28,R:.33,track:1.58,wb:2.55,L:4.1,W:1.84,cgY:.55,drag:.55,down:.25,esp:1.6,decal:'21',
+  yb:.33,beltY:1.04,roofY:1.48,wsX:.8,tireW:.24,rim:'#f2f2f0',spokes:6,spokeW:.07,caliper:'#f2b705',
   upper:[[2.05,.42],[2.07,.62],[1.95,.78],[.8,.98],[-.5,1.04],[-1.95,1.08],[-2.08,1.0],[-2.1,.48]],
   cabin:[[.85,.96],[-.05,1.42],[-1.7,1.44],[-2.02,1.08],[-1.9,1.03],[.75,.96]],cabW:1.56,
   roof:[[0,1.4],[-1.7,1.42],[-1.72,1.48],[.02,1.47]],
   hl:{x:.6,y:.7,w:.46},tl:{x:.62,y:.9,w:.4},plateF:.45,plateR:.62,doors:[.85,-.15,-1.12],bX:-.15,exhaust:[.5],rearSeats:true,extra:'spoiler'},
- {brand:'Kaçkar',model:'Yayla 4x4',type:'Arazi SUV · 4 çeker',hp:280,mass:2050,awd:true,tq:580,redline:6200,gears:[3.8,2.4,1.6,1.2,1.0,0.8],rev:3.5,final:3.9,
-  grip:1.02,offroad:.97,steer:.55,freq:1.35,restLen:.36,R:.4,track:1.7,wb:2.85,L:4.75,W:1.98,cgY:.74,drag:.75,down:.1,
-  yb:.5,beltY:1.27,roofY:1.86,wsX:1.1,tireW:.3,rim:'#7d838a',spokes:6,spokeW:.08,caliper:'#9aa0a6',plate:'53 KY 280',
-  upper:[[2.36,.62],[2.4,.85],[2.36,1.08],[1.15,1.22],[-.5,1.27],[-2.3,1.3],[-2.42,1.22],[-2.42,.62]],
-  cabin:[[1.15,1.2],[.3,1.8],[-2.15,1.82],[-2.33,1.3],[1.0,1.2]],cabW:1.74,
-  roof:[[.32,1.78],[-2.15,1.8],[-2.15,1.86],[.3,1.85]],
-  hl:{x:.68,y:.95,w:.48},tl:{x:.74,y:1.05,w:.28},plateF:.7,plateR:.8,doors:[1.1,0,-1.18],bX:0,exhaust:[-.62,-.48],rearSeats:true,extra:'rails'}
+ {name:'Murat 650s',type:'Ortadan motorlu süper spor · arkadan itiş',plate:'34 MRT 34',hp:650,mass:1420,drive:'rwd',tq:680,redline:8200,gears:[3.1,2.2,1.7,1.38,1.15,0.97,0.82],rev:3.0,final:3.4,
+  grip:1.3,offroad:.62,steer:.57,freq:2.0,restLen:.18,R:.345,track:1.68,wb:2.67,L:4.55,W:2.0,cgY:.42,drag:.5,down:1.1,esp:3.2,
+  yb:.24,beltY:.9,roofY:1.21,wsX:.95,tireW:.3,rim:'#1d1f22',spokes:10,spokeW:.035,caliper:'#f2b705',
+  upper:[[2.22,.32],[2.26,.45],[2.12,.6],[1.2,.75],[.9,.8],[-.5,.92],[-1.6,.98],[-2.2,1.0],[-2.3,.95],[-2.32,.6],[-2.28,.36]],
+  cabin:[[1.0,.78],[.05,1.17],[-.65,1.18],[-1.9,.98],[-1.6,.93],[.85,.8]],cabW:1.5,
+  roof:[[.08,1.16],[-.63,1.17],[-.65,1.21],[.07,1.2]],
+  hl:{x:.66,y:.5,w:.5},tl:{x:.62,y:.82,w:.62},plateF:.38,plateR:.55,doors:[.95,-.55],bX:-.6,exhaust:[-.12,.12],rearSeats:false,extra:'super'}
 ];
 const PAINTS=[['Yarış kırmızısı','#b3121b'],['İnci beyazı','#e9e7e1'],['Gece mavisi','#1d3557'],['Antrasit','#3a3d41'],['Sarı','#f0b513'],['Zümrüt','#0f5e49']];
 
@@ -711,7 +766,7 @@ const CM={
 };
 const carTexCache={};
 function plateTexFor(s){if(carTexCache[s])return carTexCache[s];const t=tex(cvs(256,56,g=>{g.fillStyle='#f4f4f0';g.fillRect(0,0,256,56);g.strokeStyle='#111';g.lineWidth=3;g.strokeRect(1.5,1.5,253,53);g.fillStyle='#1d3fa0';g.fillRect(3,3,30,50);g.fillStyle='#fff';txt(g,'TR',18,42,26,15);g.fillStyle='#111';txt(g,s,146,30,205,42)}));carTexCache[s]=t;return t}
-function decalTex(){if(carTexCache.decal)return carTexCache.decal;const t=tex(cvs(128,128,g=>{g.clearRect(0,0,128,128);g.beginPath();g.arc(64,64,60,0,Math.PI*2);g.fillStyle='#fff';g.fill();g.lineWidth=5;g.strokeStyle='#111';g.stroke();g.fillStyle='#111';txt(g,'27',64,68,90,70)}));carTexCache.decal=t;return t}
+function decalTex(n){const k='d'+n;if(carTexCache[k])return carTexCache[k];const t=tex(cvs(128,128,g=>{g.clearRect(0,0,128,128);g.beginPath();g.arc(64,64,60,0,Math.PI*2);g.fillStyle='#fff';g.fill();g.lineWidth=5;g.strokeStyle='#111';g.stroke();g.fillStyle='#111';txt(g,n,64,68,90,70)}));carTexCache[k]=t;return t}
 
 function extrudeProfile(pts,width,bev){
   const s=new THREE.Shape();s.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)s.lineTo(pts[i][0],pts[i][1]);s.closePath();
@@ -746,11 +801,14 @@ function buildCarModel(sp,paintHex){
   const hw=sp.W/2,ra=sp.R+.065,fp=frontPoly(sp),rp=rearPoly(sp);
   add(bodyShapeGeo(sp),paint);
   const gl=add(extrudeProfile(sp.cabin,sp.cabW,.05),CM.glass,false);gl.renderOrder=3;
-  add(extrudeProfile(sp.roof,sp.cabW-.04,.03),paint);
+  if(sp.roof)add(extrudeProfile(sp.roof,sp.cabW-.04,.03),paint);
   // pillars
   const strut=(p1,p2,x,t,m)=>{const a=new THREE.Vector3(x,p1[1],-p1[0]),b=new THREE.Vector3(x,p2[1],-p2[0]),d=b.clone().sub(a),l=d.length();const me=add(box(t,l,.07),m,false);me.position.copy(a).add(b).multiplyScalar(.5);me.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize())};
   const ce=sp.cabW/2+.005;
-  for(const sx of [-1,1]){strut(sp.cabin[0],sp.cabin[1],sx*ce,.05,CM.black);strut(sp.cabin[2],sp.cabin[3],sx*ce,.06,paint);
+  const slab=(p1,p2,x,wd,th,m)=>{const a=new THREE.Vector3(x,p1[1],-p1[0]),b=new THREE.Vector3(x,p2[1],-p2[0]),d=b.clone().sub(a),l=d.length();const me=add(box(wd,l,th),m,false);me.position.copy(a).add(b).multiplyScalar(.5);me.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());return me};
+  const HEAVY=['rails','offroad','pickup'].includes(sp.extra);
+  if(sp.open)add(box(sp.cabW+.02,.05,.06).translate(0,sp.cabin[1][1],-sp.cabin[1][0]),CM.black,false);
+  for(const sx of [-1,1]){strut(sp.cabin[0],sp.cabin[1],sx*ce,.05,CM.black);if(sp.open)continue;strut(sp.cabin[2],sp.cabin[3],sx*ce,.06,paint);
     strut([sp.bX,sp.beltY],[sp.bX-.05,sp.roofY-.03],sx*ce,.05,CM.black);
     const trimL=sp.cabin[0][0]-sp.cabin[3][0];const tr=add(box(.02,.02,trimL),CM.chrome,false);tr.position.set(sx*(sp.cabW/2+.015),sp.beltY+.005,-(sp.cabin[0][0]+sp.cabin[3][0])/2)}
   // door gaps & handles
@@ -758,14 +816,14 @@ function buildCarModel(sp,paintHex){
   for(const sx of [-1,1]){for(const X of sp.doors){const y0=archTop(X),y1=sp.beltY-.03;add(box(.006,y1-y0,.012).translate(sx*(hw+.003),(y0+y1)/2,-X),CM.gap,false)}
     for(let i=0;i<sp.doors.length-1;i++){const X=sp.doors[i+1]+.22;add(box(.03,.035,.19).translate(sx*(hw+.012),sp.beltY-.13,-X),CM.chrome,false)}
     // side skirt
-    const s0=-sp.wb/2+ra+.02,s1=sp.wb/2-ra-.02,sh=sp.extra==='rails'?.2:.09;add(box(.06,sh,s1-s0).translate(sx*(hw-.01),sp.yb+sh/2-.01,-(s0+s1)/2),CM.trim);
+    const s0=-sp.wb/2+ra+.02,s1=sp.wb/2-ra-.02,sh=HEAVY?.2:.09;add(box(.06,sh,s1-s0).translate(sx*(hw-.01),sp.yb+sh/2-.01,-(s0+s1)/2),CM.trim);
     // mirrors
     const mg=new THREE.Group();mg.position.set(sx*(hw+.09),sp.beltY+.09,-(sp.cabin[0][0]-.2));body.add(mg);
     add(box(.17,.11,.14),paint,true,mg);add(new THREE.PlaneGeometry(.13,.08).translate(0,0,.072),CM.mirror,false,mg);add(box(.09,.03,.05).translate(-sx*.1,-.02,.02),CM.black,false,mg);
     add(box(.025,.08,.11).translate(sx*.075,-.02,-.02),CM.amber,false,mg)}
   // wheel arch liners, flares
   for(const ax of [-sp.wb/2,sp.wb/2]){add(new THREE.CylinderGeometry(ra-.004,ra-.004,sp.W-.1,22,1,true,0,Math.PI).rotateZ(Math.PI/2).translate(0,sp.R,-ax),new THREE.MeshStandardMaterial({color:C('#0a0a0a'),roughness:1,side:THREE.DoubleSide}),false);
-    if(sp.extra==='rails')for(const sx of [-1,1])add(new THREE.TorusGeometry(ra+.02,.05,6,18,Math.PI).rotateY(Math.PI/2).translate(sx*(hw-.01),sp.R,-ax),CM.trim)}
+    if(HEAVY)for(const sx of [-1,1])add(new THREE.TorusGeometry(ra+.02,.05,6,18,Math.PI).rotateY(Math.PI/2).translate(sx*(hw-.01),sp.R,-ax),CM.trim)}
   add(box(sp.W-.2,.04,sp.L-.5).translate(0,sp.yb+.07,0),CM.trim,false);
   // front: headlights, grille, intake, badge, plate
   const frontAt=(y)=>{const s=surfAt(fp,y);return {z:-(s.x+.06),a:Math.atan2(-s.tx,s.ty)}};
@@ -774,10 +832,14 @@ function buildCarModel(sp,paintHex){
   const rpanel=(y,w,h,m,proud,d=.04)=>{const f=rearAt(y),me=add(box(w,h,d),m,false);me.position.set(0,y,f.z-d/2+proud);me.rotation.x=f.a;return me};
   const hf=frontAt(sp.hl.y),hlUnits=[];
   for(const sx of [-1,1]){const u=new THREE.Group();u.position.set(sx*sp.hl.x,sp.hl.y,hf.z+.05);u.rotation.x=hf.a;body.add(u);
-    add(box(sp.hl.w,.15,.12),CM.darkChrome,false,u);
+    if(sp.hl.round){const r=sp.hl.w/2;add(new THREE.CylinderGeometry(r,r,.1,28).rotateX(Math.PI/2),CM.chrome,false,u);
+      add(new THREE.CylinderGeometry(r*.84,r*.84,.02,28).rotateX(Math.PI/2).translate(0,0,-.05),CM.head,false,u);
+      add(new THREE.TorusGeometry(r*.88,.012,6,28).translate(0,0,-.055),CM.drl,false,u);
+      add(new THREE.CylinderGeometry(.04,.04,.03,14).rotateX(Math.PI/2).translate(sx*(r+.09),-r*.4,-.02),CM.amber,false,u)}
+    else{add(box(sp.hl.w,.15,.12),CM.darkChrome,false,u);
     for(const k of [-1,1])add(new THREE.CylinderGeometry(.045,.05,.03,18).rotateX(Math.PI/2).translate(k*sp.hl.w*.2,.012,-.065),CM.head,false,u);
     add(box(sp.hl.w*.92,.022,.012).translate(0,-.055,-.064),CM.drl,false,u);
-    add(box(.07,.06,.012).translate(sx*(sp.hl.w/2-.05),.03,-.064),CM.amber,false,u);hlUnits.push(u)}
+    add(box(.07,.06,.012).translate(sx*(sp.hl.w/2-.05),.03,-.064),CM.amber,false,u)}hlUnits.push(u)}
   const gy=(sp.hl.y+sp.plateF)/2+.02;fpanel(gy,sp.W*.42,Math.max(.12,sp.hl.y-sp.plateF-.1),CM.grille,.012);
   if(sp.plateF-.14>sp.yb+.05)fpanel(sp.plateF-.15,sp.W*.62,.09,CM.grille,.01);
   {const f=frontAt(gy+.1);const b=add(new THREE.CylinderGeometry(.055,.055,.02,20).rotateX(Math.PI/2),CM.chrome,false);b.position.set(0,Math.min(gy+.1,sp.hl.y),f.z-.01);b.rotation.x=f.a}
@@ -788,12 +850,14 @@ function buildCarModel(sp,paintHex){
   for(const k of [-1,1]){const w=add(box(.48,.012,.02),CM.black,false);w.position.set(k*.26-.08,sp.cabin[0][1]+.03,-(sp.cabin[0][0]-.1));w.rotation.z=k*.05}
   // rear: tail lamps, brake bars, reverse, third brake light, plate, exhaust
   const tr=rearAt(sp.tl.y);
-  for(const sx of [-1,1]){const u=new THREE.Group();u.position.set(sx*sp.tl.x,sp.tl.y,tr.z-.035);u.rotation.x=tr.a;body.add(u);
-    add(box(sp.tl.w,.13,.07),CM.tail,false,u);
-    add(box(sp.tl.w*.82,.03,.01).translate(0,.025,.038),CM.brake,false,u);
-    add(box(.11,.045,.01).translate(-sx*(sp.tl.w/2-.08),-.035,.038),CM.rev,false,u);
-    add(box(.06,.045,.01).translate(sx*(sp.tl.w/2-.05),-.035,.038),CM.amber,false,u)}
-  {const p=sp.cabin[2];add(box(.42,.03,.035).translate(0,p[1]-.035,-(p[0]-.03)),CM.brake,false)}
+  const tailUnit=(x,y,z,a,w,h,sx)=>{const u=new THREE.Group();u.position.set(x,y,z);u.rotation.x=a;body.add(u);
+    add(box(w,h,.07),CM.tail,false,u);
+    if(h>w){add(box(w*.7,h*.35,.01).translate(0,h*.22,.038),CM.brake,false,u);add(box(w*.7,h*.18,.01).translate(0,-h*.18,.038),CM.rev,false,u);add(box(w*.7,h*.12,.01).translate(0,-h*.38,.038),CM.amber,false,u)}
+    else{add(box(w*.82,.03,.01).translate(0,.025,.038),CM.brake,false,u);
+    add(box(Math.min(.11,w*.3),.045,.01).translate(-sx*(w/2-.08),-.035,.038),CM.rev,false,u);
+    add(box(.06,.045,.01).translate(sx*(w/2-.05),-.035,.038),CM.amber,false,u)}};
+  for(const sx of [-1,1])if(sp.extra!=='pickup')tailUnit(sx*sp.tl.x,sp.tl.y,tr.z-.035,tr.a,sp.tl.w,.13,sx);
+  if(!sp.open){const p=sp.cabin[2];add(box(.42,.03,.035).translate(0,p[1]-.035,-(p[0]-.03)),CM.brake,false)}
   {const f=rearAt(sp.plateR);const g=new THREE.Group();g.position.set(0,sp.plateR,f.z+.015);g.rotation.x=f.a;body.add(g);
     add(box(.56,.13,.02),CM.black,false,g);add(new THREE.PlaneGeometry(.52,.115).translate(0,0,.012),new THREE.MeshStandardMaterial({map:plateTexFor(sp.plate),roughness:.5}),false,g)}
   rpanel(sp.tl.y-.1,.09,.09,CM.chrome,.01,.02);
@@ -807,18 +871,54 @@ function buildCarModel(sp,paintHex){
   for(const sx of [-.37,.37]){add(box(.48,.12,.5).translate(sx,sp.yb+.36,seatZ),CM.seat,false);const bk=add(box(.48,.62,.12),CM.seat,false);bk.position.set(sx,sp.yb+.72,seatZ+.3);bk.rotation.x=-.18;add(box(.26,.16,.1).translate(sx,sp.yb+1.1,seatZ+.37),CM.seat,false)}
   if(sp.rearSeats){const rz=seatZ+.95;add(box(sp.cabW-.2,.12,.5).translate(0,sp.yb+.38,rz),CM.seat,false);const bk=add(box(sp.cabW-.2,.58,.12),CM.seat,false);bk.position.set(0,sp.yb+.72,rz+.28);bk.rotation.x=-.15}
   // extras
-  if(sp.extra==='wing'){add(box(1.5,.04,.32).translate(0,1.1,1.98),CM.black);for(const sx of [-.55,.55])add(box(.05,.12,.12).translate(sx,1.03,1.98),CM.black);
-    add(box(sp.W*.86,.03,.18).translate(0,sp.yb-.0,frontAt(sp.yb+.02).z+.05),CM.black,false)}
-  if(sp.extra==='spoiler'){add(box(1.42,.05,.38).translate(0,1.47,1.86),paint);
+  const X=sp.extra,ezR=rearAt(sp.yb+.12).z;
+  const yAtX=(X0)=>{const u=sp.upper;for(let i=0;i<u.length-1;i++){const [x1,y1]=u[i],[x2,y2]=u[i+1];if((X0<=x1&&X0>=x2)){const t=(X0-x1)/((x2-x1)||1e-6);return y1+(y2-y1)*t}}return sp.beltY};
+  if(X==='gt'||X==='lip'){const rx=sp.upper[sp.upper.length-4][0];add(box(sp.W*.62,.035,.12).translate(0,yAtX(rx)+.03,-(rx+.04)),X==='gt'?paint:CM.black)}
+  if(X==='hatch'){const p=sp.cabin[2];add(box(sp.cabW*.85,.035,.22).translate(0,p[1]+.02,-(p[0]+.05)),paint)}
+  if(X==='spoiler'){add(box(1.42,.05,.38).translate(0,1.47,1.86),paint);
     add(box(.34,.004,2.7).translate(0,1.0,-.75),new THREE.MeshStandardMaterial({color:C('#ece9e2'),roughness:.4}),false);
-    const dm=new THREE.MeshStandardMaterial({map:decalTex(),transparent:true,alphaTest:.5,roughness:.5,polygonOffset:true,polygonOffsetFactor:-2});
+    const dm=new THREE.MeshStandardMaterial({map:decalTex(sp.decal||'27'),transparent:true,alphaTest:.5,roughness:.5,polygonOffset:true,polygonOffsetFactor:-2});
     const dX=-(sp.doors[0]+sp.doors[1])/2,dY=(sp.yb+sp.beltY)/2+.06;
     add(new THREE.PlaneGeometry(.5,.5).rotateY(Math.PI/2).translate(hw+.005,dY,dX),dm,false);add(new THREE.PlaneGeometry(.5,.5).rotateY(-Math.PI/2).translate(-hw-.005,dY,dX),dm,false);
     for(const sx of [-1,1])add(box(sp.tireW,.24,.012).translate(sx*sp.track/2,sp.R*.45,sp.wb/2+sp.R+.12),CM.trim,false);
     add(box(.05,.07,.18).translate(0,sp.roofY+.04,1.25),CM.black,false)}
-  if(sp.extra==='rails'){for(const sx of [-.72,.72])add(box(.06,.07,2.3).translate(sx,sp.roofY+.06,.9),CM.black);for(const z of [.2,1.5])add(box(1.44,.04,.05).translate(0,sp.roofY+.1,z),CM.black);
+  if(X==='rails'){for(const sx of [-.72,.72])add(box(.06,.07,2.3).translate(sx,sp.roofY+.06,.9),CM.black);for(const z of [.2,1.5])add(box(1.44,.04,.05).translate(0,sp.roofY+.1,z),CM.black);
     add(box(sp.W*.62,.05,.3).translate(0,sp.yb+.02,frontAt(sp.yb+.08).z+.12),new THREE.MeshStandardMaterial({color:C('#b8bcc0'),metalness:.8,roughness:.35}),false);
     add(box(.05,.07,.18).translate(0,sp.roofY+.04,1.6),CM.black,false)}
+  if(X==='offroad'){
+    // spare wheel on the tailgate
+    const sw=new THREE.Mesh(new THREE.CylinderGeometry(sp.R*.92,sp.R*.92,.26,30).rotateX(Math.PI/2),[CM.tread,CM.sidewall,CM.sidewall]);sw.position.set(0,1.05,rearAt(1.05).z+.14);sw.castShadow=true;body.add(sw);
+    add(new THREE.CylinderGeometry(sp.R*.55,sp.R*.55,.27,20).rotateX(Math.PI/2).translate(0,1.05,rearAt(1.05).z+.14),new THREE.MeshStandardMaterial({color:C(sp.rim),metalness:.8,roughness:.3}),false);
+    // bull bar
+    const bz=frontAt(.8).z-.2,bar=new THREE.MeshStandardMaterial({color:C('#1a1b1d'),metalness:.6,roughness:.4});
+    for(const x of [-.42,.42])add(new THREE.CylinderGeometry(.035,.035,.62,10).translate(x,.86,bz),bar);
+    add(new THREE.CylinderGeometry(.035,.035,1.0,10).rotateZ(Math.PI/2).translate(0,1.16,bz),bar);add(new THREE.CylinderGeometry(.035,.035,1.5,10).rotateZ(Math.PI/2).translate(0,.62,bz+.04),bar);
+    // snorkel
+    add(box(.09,.95,.09).translate(hw+.05,sp.beltY+.25,-(sp.cabin[0][0]-.06)),CM.trim);add(box(.12,.1,.18).translate(hw+.05,sp.roofY-.15,-(sp.cabin[0][0]-.1)),CM.trim);
+    // roof basket
+    for(const sx of [-.78,.78])add(box(.04,.08,2.2).translate(sx,sp.roofY+.1,.8),bar);for(const z of [-.25,.4,1.1,1.85])add(box(1.6,.04,.04).translate(0,sp.roofY+.12,z),bar);
+    for(const z of [-.25,1.85])add(box(1.6,.12,.04).translate(0,sp.roofY+.18,z),bar)}
+  if(X==='pickup'){const bx0=-1.0,bx1=-2.62,len=bx0-bx1,cz=-(bx0+bx1)/2,top=sp.beltY+.02,fl=.95;
+    for(const sx of [-1,1])add(box(.07,top-fl+.04,len+.06).translate(sx*(hw-.035),(top+fl)/2,cz),paint);
+    add(box(sp.W-.02,top-fl,.07).translate(0,(top+fl)/2,ezR-.035),paint);
+    add(box(.5,.06,.02).translate(0,top-.12,ezR+.002),CM.chrome,false);
+    add(box(sp.W-.16,.02,len-.06).translate(0,fl+.012,cz),CM.trim,false);
+    for(const sx of [-.82,.82])add(box(.06,.5,.06).translate(sx,top+.25,-(bx0-.2)),CM.black);add(box(1.7,.06,.06).translate(0,top+.5,-(bx0-.2)),CM.black);
+    for(const sx of [-1,1])tailUnit(sx*(hw-.07),top-.22,ezR-.035,0,.13,.32,sx);
+    add(box(sp.W*.5,.32,.04).translate(0,sp.hl.y-.08,frontAt(sp.hl.y-.08).z-.01),CM.chrome,false)}
+  if(X==='roadster'){const seatZ=-(sp.wsX-1.02)+.55;
+    for(const sx of [-.37,.37])add(new THREE.TorusGeometry(.2,.035,8,16,Math.PI).translate(sx,sp.beltY+.03,seatZ),CM.chrome);
+    add(box(sp.cabW,.04,.5).translate(0,sp.beltY-.01,seatZ+.35),CM.interior,false)}
+  if(X==='muscle'){add(box(.55,.09,.65).translate(0,yAtX(1.4)+.04,-1.4),paint);add(box(.42,.06,.02).translate(0,yAtX(1.1)+.06,-1.08),CM.black,false);
+    const sm=new THREE.MeshStandardMaterial({color:C('#f2f0ea'),roughness:.35,polygonOffset:true,polygonOffsetFactor:-2});
+    for(const x of [-.17,.17]){slab([2.28,yAtX(2.28)+.008],[.86,yAtX(.86)+.008],x,.2,.008,sm);slab([.07,1.32],[-.64,1.335],x,.2,.008,sm)}
+    fpanel(sp.plateF+.13,sp.W*.98,.07,CM.chrome,.06,.07);rpanel(sp.plateR+.14,sp.W*.98,.07,CM.chrome,.06,.07);
+    add(box(sp.W*.8,.05,.1).translate(0,1.0,2.33),paint)}
+  if(X==='super'){add(box(1.75,.04,.38).translate(0,sp.roofY+.1,2.0),CM.black);for(const sx of [-.5,.5])add(box(.05,.26,.14).translate(sx,sp.roofY-.03,2.0),CM.black);
+    for(const sx of [-1,1]){add(box(.03,.26,.55).translate(sx*(hw+.004),.72,.85),CM.grille,false)}
+    for(let k=0;k<5;k++)add(box(1.2,.02,.05).translate(0,1.0,1.95+k*.07),CM.black,false);
+    for(let k=-2;k<=2;k++)add(box(.02,.12,.3).translate(k*.32,sp.yb+.04,ezR-.15),CM.black,false);
+    add(box(sp.W*.92,.025,.22).translate(0,sp.yb-.01,frontAt(sp.yb+.02).z+.08),CM.black,false)}
   // wheels
   const rimM=new THREE.MeshStandardMaterial({color:C(sp.rim),roughness:.22,metalness:1});
   const calM=new THREE.MeshStandardMaterial({color:C(sp.caliper),roughness:.4,metalness:.3});
@@ -848,7 +948,7 @@ const obsList=[];
 class Car{
   constructor(sp){
     this.sp=sp;const m=this.m=sp.mass,h=1.2;
-    this.I=new THREE.Vector3(m/12*(h*h+sp.L*sp.L),m/12*(sp.W*sp.W+sp.L*sp.L),m/12*(sp.W*sp.W+h*h)*1.1);
+    this.I=new THREE.Vector3(m/12*(h*h+sp.L*sp.L)*.85,m/12*(sp.W*sp.W+sp.L*sp.L)*.78,m/12*(sp.W*sp.W+h*h)*1.1);
     this.k=m/4*Math.pow(2*Math.PI*sp.freq,2);this.c=2*.45*Math.sqrt(this.k*m/4);this.sag=m*9.81/4/this.k;
     this.maxLen=sp.restLen+sp.R;
     const my=sp.R-sp.cgY+sp.restLen-this.sag;
@@ -895,9 +995,9 @@ class Car{
       else if(this.gear>1){const lr=Math.abs(this.driven)/sp.R*sp.gears[this.gear-2]*sp.final*9.549;if(lr<sp.redline*.55){this.gear--;this.shiftT=.2}}}
     const x=this.rpm/sp.redline;let tq=sp.tq*clamp(1-1.3*(x-.62)*(x-.62),.45,1);
     if(this.rpm>=sp.redline||this.shiftT>.08)tq=0;
-    const driveF=tq*gr*.86/sp.R*thr*(this.gear<0?-1:1);
+    const driveF=tq*gr*.72/sp.R*thr*(this.gear<0?-1:1);
     const Fb=m*9.81*1.15*brk;
-    const maxSteer=sp.steer/(1+speed*.055);
+    const maxSteer=sp.steer/(1+Math.max(0,speed-9)*.12);
     this.steer=inp.steer*maxSteer;
     Fsum.set(0,-9.81*m,0);Tsum.set(0,0,0);
     Fsum.addScaledVector(v,-sp.drag*speed);Fsum.addScaledVector(up,-sp.down*vLong*vLong);
@@ -914,17 +1014,17 @@ class Car{
         Fs=clamp(Fs,0,m*9.81*3);
         const st=wh.front?this.steer:0,cs=Math.cos(st),sn=Math.sin(st);
         wf.copy(fwd).multiplyScalar(cs).addScaledVector(right,sn);wf.addScaledVector(n,-wf.dot(n)).normalize();wr.crossVectors(wf,n).normalize();
-        const vl=vp.dot(wf),vt=vp.dot(wr),N=Fs,mu=sp.grip*(G.paved?1:sp.offroad);
+        const vl=vp.dot(wf),vt=vp.dot(wr),N=Fs,mu=sp.grip*(G.paved?1:sp.offroad)*(wh.front?.97:1.2);
         const hb=inp.hand&&!wh.front;
         const alpha=Math.atan2(vt,Math.max(Math.abs(vl),1.5));
-        let Fy=-mu*(hb?.42:1)*N*Math.sin(1.45*Math.atan(9*alpha));
-        const dw=sp.awd?(wh.front?.2:.3):(wh.front?0:.5);
+        let Fy=-mu*(hb?.42:1)*N*Math.sin(1.3*Math.atan(9*alpha));
+        const dw=sp.drive==='awd'?(wh.front?.2:.3):sp.drive==='fwd'?(wh.front?.5:0):(wh.front?0:.5);
         let Fx=driveF*dw;
         const bw=wh.front?.31:.19;
         if(brk>0)Fx+=-Math.sign(vl)*Fb*bw*clamp(Math.abs(vl)/.6,0,1);
         if(hb)Fx=-Math.sign(vl)*mu*N*.75*clamp(Math.abs(vl)/.8,0,1);
         if(thr<.05&&brk<.05&&!hb){if(speed<.8)Fx+=clamp(-vl*m*.9,-mu*N,mu*N);else{Fx-=Math.sign(vl)*N*.018;if(dw>0)Fx-=Math.sign(vl)*N*.05}}
-        const maxF=mu*N,mag=Math.hypot(Fx,Fy);if(mag>maxF&&mag>0){const k=maxF/mag;Fx*=k;Fy*=k}
+        const maxF=mu*N;if(hb){const mag=Math.hypot(Fx,Fy);if(mag>maxF&&mag>0){const k=maxF/mag;Fx*=k;Fy*=k}}else{const fxMax=Math.sqrt(Math.max(0,maxF*maxF-Fy*Fy))*.98+maxF*.02;Fx=clamp(Fx,-fxMax,fxMax)}
         const spinning=Math.abs(driveF*dw)>maxF*1.02&&Math.abs(vl)<14;
         let lock=0;if(brk>.2&&Math.abs(vl)>2){const dem=Fb*bw;if(dem>maxF*.95)lock=clamp((dem-maxF*.95)/(maxF*.6),0,1)}
         if(hb&&Math.abs(vl)>3)lock=Math.max(lock,.75);
@@ -937,10 +1037,13 @@ class Car{
         wh.vl=spinning?Math.sign(driveF)*Math.max(Math.abs(vl),8):(lock>.6&&!spinning?vl*.2:vl);
         if(dw>0){dSum+=vl;dN++}
         wh.cx=contact.x;wh.cy=contact.y;wh.cz=contact.z;
-      }else{wh.contact=false;wh.t=this.maxLen;wh.slip=0;if(thr>.1&&(sp.awd||!wh.front))wh.vl=lerp(wh.vl,Math.sign(driveF||1)*30,dt*2);else wh.vl*=1-dt*.6}
+      }else{wh.contact=false;wh.t=this.maxLen;wh.slip=0;if(thr>.1&&(sp.drive==='awd'||(sp.drive==='fwd')===wh.front))wh.vl=lerp(wh.vl,Math.sign(driveF||1)*30,dt*2);else wh.vl*=1-dt*.6}
     }
     this.airborne=!anyC;this.skid=skid;this.brakeSlip=bs;this.latSlip=ls;
     if(dN>0)this.driven=dSum/dN;else if(thr>.1)this.driven=lerp(this.driven,this.driven+5,dt);
+    // stability control: pull yaw rate toward what the steering asks for (off with handbrake)
+    if(!this.airborne&&!inp.hand&&Math.abs(vLong)>2.5){const yr=w.dot(up),lim=.95*sp.grip*9.81/Math.max(3,Math.abs(vLong)),want=clamp(-vLong*Math.tan(this.steer)/sp.wb,-lim,lim);const err=clamp(yr-want,-1.5,1.5);
+      Tsum.addScaledVector(up,-err*this.I.y*sp.esp*2.4*clamp((Math.abs(vLong)-2.5)/6,0,1))}
     if(this.airborne){Tsum.addScaledVector(up,inp.steer*this.I.y*1.6);Tsum.addScaledVector(right,(inp.brake-inp.throttle)*this.I.x*.9);
       _c.set(0,1,0);_d.crossVectors(up,_c);Tsum.x+=_d.x*this.I.x*7;Tsum.y+=_d.y*this.I.y*7;Tsum.z+=_d.z*this.I.z*7;
       const wu=w.dot(up);_d.copy(w).addScaledVector(up,-wu);w.addScaledVector(_d,-Math.min(1,dt*2.5))}
@@ -1055,7 +1158,7 @@ function spawnCar(){
   if(model)scene.remove(model.root);
   car=new Car(sp);model=buildCarModel(sp,PAINTS[paintIdx][1]);scene.add(model.root);
   car.reset(0,150,0);
-  $('hudCar').textContent=sp.brand+' '+sp.model;
+  $('hudCar').textContent=sp.name+' · '+sp.plate;
   for(let i=0;i<4;i++)lastMark[i]=null;
 }
 function flipBack(){if(!car)return;const f=_a.set(0,0,-1).applyQuaternion(car.q);const yaw=Math.atan2(-f.x,-f.z);car.reset(car.p.x,car.p.z,yaw);toast('Araç kaldırıldı')}
@@ -1072,7 +1175,7 @@ let toastT=0;function toast(msg,ms=2200){const t=$('toast');t.textContent=msg;t.
 function renderMenu(){
   const cars=$('cars');cars.innerHTML='';
   CARS.forEach((sp,i)=>{const b=document.createElement('button');b.type='button';b.className='carbtn';b.id='car-'+i;b.setAttribute('aria-pressed',i===carIdx);
-    b.innerHTML=`<span class="nm">${sp.brand} ${sp.model}</span><span class="ty">${sp.type}</span><span class="sp"><b>${sp.hp}</b> hp<br><b>${sp.mass.toLocaleString('tr-TR')}</b> kg</span>`;
+    b.innerHTML=`<span class="nm">${i+1}. ${sp.name}</span><span class="ty">${sp.type} · ${sp.plate}</span><span class="sp"><b>${sp.hp}</b> hp<br><b>${sp.mass.toLocaleString('tr-TR')}</b> kg</span>`;
     b.onclick=()=>{carIdx=i;spawnCar();renderMenu()};cars.appendChild(b)});
   const pa=$('paints');pa.innerHTML='';
   PAINTS.forEach(([n,h],i)=>{const b=document.createElement('button');b.type='button';b.className='sw';b.id='paint-'+i;b.title=n;b.setAttribute('aria-label',n);b.style.background=h;b.setAttribute('aria-pressed',i===paintIdx);
