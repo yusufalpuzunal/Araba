@@ -383,6 +383,43 @@ function colorize(g, c) {
   g.setAttribute("color", new THREE.BufferAttribute(a, 3));
   return g;
 }
+/* ---------- gömülü modeller (city-props.js): önü +Z, tabanı y=0 ---------- */
+const PROP_CACHE = {};
+function propBase(key, lib = CITY_PROPS) {
+  const ck = (lib === CITY_PROPS ? "" : "old:") + key;
+  if (PROP_CACHE[ck]) return PROP_CACHE[ck];
+  const m = lib[key],
+    v = new Int16Array(b64(m.v)),
+    n = new Int8Array(b64(m.n)),
+    c = new Uint8Array(b64(m.c)),
+    nv = v.length / 3,
+    pos = new Float32Array(nv * 3),
+    nor = new Float32Array(nv * 3),
+    col = new Float32Array(nv * 3),
+    tc = new THREE.Color();
+  for (let i = 0; i < nv * 3; i++) {
+    pos[i] = v[i] / 1000;
+    nor[i] = n[i] / 127;
+  }
+  for (let i = 0; i < nv; i++) {
+    tc.setRGB(c[i * 3] / 255, c[i * 3 + 1] / 255, c[i * 3 + 2] / 255).convertSRGBToLinear();
+    col[i * 3] = tc.r;
+    col[i * 3 + 1] = tc.g;
+    col[i * 3 + 2] = tc.b;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
+  g.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(nv * 2), 2));
+  g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  g.setIndex(new THREE.BufferAttribute(m.big ? new Uint32Array(b64(m.i)) : new Uint16Array(b64(m.i)), 1));
+  g.size = m.size;
+  return (PROP_CACHE[ck] = g);
+}
+// ang: modelin önünü (sin ang, cos ang) yönüne çevirir
+function propGeo(key, x, y, z, ang = 0) {
+  return propBase(key).clone().rotateY(ang).translate(x, y, z);
+}
 function flatPlane(w, d, x, z, y, uScale, vScale) {
   const g = new THREE.PlaneGeometry(w, d);
   g.rotateX(-Math.PI / 2);

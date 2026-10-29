@@ -212,6 +212,36 @@ function stopCreak() {
 }
 
 // tabelaya çarpma: kısa, tok bir metal "dank" sesi (birkaç uyumsuz frekans + kısa gürültü patlaması)
+// tok, metal olmayan çarpma (saksı, bank, çöp poşeti)
+function softHit(speed) {
+  if (!audio || !soundOn) return;
+  const c = audio.ctx,
+    t = c.currentTime,
+    out = c.createGain();
+  out.gain.value = clamp(0.2 + speed * 0.015, 0.2, 0.55);
+  out.connect(audio.master);
+  const o = c.createOscillator(),
+    g = c.createGain();
+  o.frequency.setValueAtTime(140, t);
+  o.frequency.exponentialRampToValueAtTime(55, t + 0.18);
+  g.gain.setValueAtTime(0.9, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+  o.connect(g);
+  g.connect(out);
+  o.start(t);
+  o.stop(t + 0.25);
+  const nb = c.createBuffer(1, c.sampleRate * 0.12, c.sampleRate),
+    d = nb.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+  const ns = c.createBufferSource(),
+    lp = c.createBiquadFilter();
+  ns.buffer = nb;
+  lp.type = "lowpass";
+  lp.frequency.value = 900;
+  ns.connect(lp);
+  lp.connect(out);
+  ns.start(t);
+}
 function metalHit(speed) {
   if (!audio || !soundOn) return;
   const c = audio.ctx,

@@ -72,7 +72,8 @@ function breakIt(b, vx, vz, speed) {
     sz: dz * speed * 0.55,
     t: 0,
   });
-  metalHit(speed);
+  if (b.soft) softHit(speed);
+  else metalHit(speed);
 }
 function updateDebris(dt) {
   for (let i = DEBRIS.length - 1; i >= 0; i--) {

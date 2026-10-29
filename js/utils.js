@@ -60,3 +60,5 @@ function fbm(x, y, o) {
 }
 const C = (hex) => new THREE.Color(hex).convertSRGBToLinear();
 const FONT = '"Barlow Condensed","Arial Narrow","Segoe UI",sans-serif';
+// base64 metni -> ArrayBuffer (gömülü 3B modeller için)
+const b64 = (s) => Uint8Array.from(atob(s), (ch) => ch.charCodeAt(0)).buffer;

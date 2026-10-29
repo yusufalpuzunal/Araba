@@ -266,6 +266,25 @@ function buildWorld() {
   const shopQB = new QB(false),
     awnQB = new QB(true);
   const treeSpots = [];
+  // cephe ayrıntıları (City Pack): klima dış üniteleri, yangın merdivenleri, çatı çıkışları
+  let acN = 0,
+    fireN = 0;
+  // klima dış ünitesi: beyaz kasa, önde pervane ızgarası ve yan panjur (önü +Z)
+  const AC_GEO = merge([
+    colorize(new THREE.BoxGeometry(0.99, 0.65, 0.41).translate(0, 0.325, 0), C("#e8e9e6")),
+    colorize(
+      new THREE.CylinderGeometry(0.24, 0.24, 0.03, 14).rotateX(Math.PI / 2).translate(0.17, 0.33, 0.2),
+      C("#3a3d40"),
+    ),
+    colorize(
+      new THREE.CylinderGeometry(0.06, 0.06, 0.04, 8).rotateX(Math.PI / 2).translate(0.17, 0.33, 0.21),
+      C("#9a9c9e"),
+    ),
+    colorize(new THREE.BoxGeometry(0.26, 0.46, 0.02).translate(-0.3, 0.33, 0.21), C("#c9cbc8")),
+    colorize(new THREE.BoxGeometry(0.1, 0.04, 0.3).translate(-0.3, 0.02, 0.06), C("#7b7d7f")),
+    colorize(new THREE.BoxGeometry(0.1, 0.04, 0.3).translate(0.3, 0.02, 0.06), C("#7b7d7f")),
+  ]);
+  const blockC = (v) => Math.round((v - 30) / 60) * 60 + 30;
   function cellUV4Shop(i) {
     const c = i % 4,
       r = (i / 4) | 0;
@@ -313,6 +332,11 @@ function buildWorld() {
           colorize(new THREE.BoxGeometry(uw, uh, ud).translate(ux, h + 0.55 + uh / 2, uz), C("#b9bcbf")),
         );
     }
+    if (w > 7 && d > 7 && rng() < 0.5) {
+      const ex = cx + (rng() - 0.5) * (w - 5),
+        ez = cz + (rng() - 0.5) * (d - 5);
+      detail.push(propGeo("roofexit", ex, h + 0.4, ez, ((rng() * 4) | 0) * (Math.PI / 2)));
+    }
     const faces = [
       [1, 0, d, cx + w / 2, cz],
       [-1, 0, d, cx - w / 2, cz],
@@ -323,7 +347,31 @@ function buildWorld() {
       const units = Math.max(1, Math.round(len / 6.5)),
         uw = len / units,
         rx = nz,
-        rz = -nx;
+        rz = -nx,
+        ang = Math.atan2(nx, nz);
+      // klimalar: üst katlarda pencere altlarına, seyrek
+      const bays = Math.max(1, Math.round(len / 4));
+      for (let f = 0; f < Math.min(floors, 6); f++)
+        for (let b = 0; b < bays; b++) {
+          if (acN >= 170 || rng() > 0.05) continue;
+          const off = -len / 2 + (len * (b + 0.5)) / bays;
+          detail.push(
+            AC_GEO.clone()
+              .rotateY(ang)
+              .translate(fx + rx * off + nx * 0.22, GF + f * FL + 0.12, fz + rz * off + nz * 0.22),
+          );
+          acN++;
+        }
+      // yangın merdiveni: yalnız bina aralarına bakan (sokağa bakmayan) yüzlerde
+      const street = nx ? Math.abs(fx - Math.round(fx / 60) * 60) : Math.abs(fz - Math.round(fz / 60) * 60),
+        gapHalf = nx ? Math.abs(fx - blockC(fx)) : Math.abs(fz - blockC(fz));
+      if (street > 14 && gapHalf > 2.4 && len > 11 && floors >= 3 && fireN < 90 && rng() < 0.6) {
+        const off = (rng() - 0.5) * (len - 10.5);
+        for (let y = GF; y + 7.2 <= h - 0.5; y += 7.2) {
+          detail.push(propGeo("fireexit", fx + rx * off + nx * 1.0, y, fz + rz * off + nz * 1.0, ang));
+          fireN++;
+        }
+      }
       for (let u = 0; u < units; u++) {
         const off = -len / 2 + uw * (u + 0.5),
           ox = fx + rx * off,
@@ -354,9 +402,126 @@ function buildWorld() {
       }
     }
   }
+  // ---- eski şehir: tuğla sıra evler (City Pack, city-old.js) ----
+  // her blok: dört köşede köşe binası, aralarda sıra evler, ortada ağaçlı bir avlu
+  const OLD_TOWN = new Set(["-150,-150", "-150,-90", "-90,-150"]),
+    oldGeos = [],
+    oldWin = [],
+    OLD_ROW = [
+      ["red", 3],
+      ["green", 3],
+      ["gb", 2],
+      ["rb", 2],
+      ["brown", 2],
+      ["big", 1],
+    ];
+  // yandaki pencereli yüz: kırmızı köşe binasında -X, pizzacıda +X
+  const OLD_CORNER = [
+    ["redCorner", -1],
+    ["pizza", 1],
+  ];
+  function oldHouse(base, x, z, ang, kz) {
+    const g = base.clone().scale(1, 1, kz).rotateY(ang).translate(x, 0, z);
+    // pencereler ayrı: gece bazı binaların pencereleri yanar
+    const lit = rng() < 0.55,
+      c = g.attributes.color,
+      idx = g.index.array,
+      body = [],
+      win = [];
+    for (let k = 0; k < idx.length; k += 3) {
+      const v = idx[k],
+        isWin = c.getZ(v) > 0.75 && c.getY(v) > 0.6 && c.getZ(v) >= c.getX(v);
+      (lit && isWin ? win : body).push(idx[k], idx[k + 1], idx[k + 2]);
+    }
+    const bg = g.clone();
+    bg.setIndex(body);
+    oldGeos.push(bg);
+    if (win.length) {
+      g.setIndex(win);
+      oldWin.push(g);
+    }
+    g.computeBoundingBox();
+    const bb = new THREE.Box3().setFromBufferAttribute(g.attributes.position),
+      o = { t: 0, minX: bb.min.x, maxX: bb.max.x, minZ: bb.min.z, maxZ: bb.max.z, top: bb.max.y };
+    addObs(o, o.minX, o.maxX, o.minZ, o.maxZ);
+  }
+  function oldBlock(bx, bz) {
+    const F = 21, // ön cephenin blok merkezine uzaklığı (3 m kaldırım)
+      DEPTH = 8.7;
+    for (const sxn of [-1, 1])
+      for (const szn of [-1, 1]) {
+        const [key, side] = OLD_CORNER[(rng() * 2) | 0],
+          c = propBase(key, CITY_OLD).size[0];
+        // önü ve pencereli yanı iki sokağa bakacak açıyı bul
+        let best = 0;
+        for (const a of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
+          const fx = Math.round(Math.sin(a)),
+            fz = Math.round(Math.cos(a)),
+            sx2 = Math.round(side * Math.cos(a)),
+            sz2 = Math.round(-side * Math.sin(a));
+          if ((fx === sxn && sz2 === szn) || (fz === szn && sx2 === sxn)) best = a;
+        }
+        oldHouse(propBase(key, CITY_OLD), bx + sxn * (F - c / 2), bz + szn * (F - c / 2), best, 1);
+      }
+    const span0 = -F + 5.75,
+      span1 = F - 5.75;
+    for (const [nx, nz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ]) {
+      const rx = nz,
+        rz = -nx,
+        ang = Math.atan2(nx, nz);
+      // sokak boyunca evleri sırala, kalan boşluğu evleri hafifçe genişleterek kapat
+      let list, sum;
+      for (let tries = 0; tries < 30; tries++) {
+        list = [];
+        sum = 0;
+        while (sum < span1 - span0 - 6) {
+          const tot = OLD_ROW.reduce((a, r) => a + r[1], 0);
+          let r = rng() * tot,
+            pick = OLD_ROW[0][0];
+          for (const [k, w] of OLD_ROW)
+            if ((r -= w) < 0) {
+              pick = k;
+              break;
+            }
+          if (list.length && list[list.length - 1] === pick) continue;
+          list.push(pick);
+          sum += propBase(pick, CITY_OLD).size[0];
+        }
+        const f = (span1 - span0) / sum;
+        if (f > 0.9 && f < 1.12) break;
+      }
+      const fx = (span1 - span0) / sum;
+      let u = span0;
+      for (const key of list) {
+        const s = propBase(key, CITY_OLD).size,
+          w = s[0] * fx,
+          kz = s[2] < DEPTH ? DEPTH / s[2] : 1,
+          d = s[2] * kz,
+          cu = u + w / 2,
+          x = bx + nx * (F - d / 2) + rx * cu,
+          z = bz + nz * (F - d / 2) + rz * cu;
+        // genişletme yalnız evin kendi x ekseninde (ön cephe boyunca)
+        const base = propBase(key, CITY_OLD);
+        oldHouse(Math.abs(fx - 1) > 0.01 ? base.clone().scale(fx, 1, 1) : base, x, z, ang, kz);
+        u += w;
+      }
+    }
+    // avlu: çim ve birkaç ağaç
+    parkGeos.push(flatPlane(2 * (F - DEPTH) - 1, 2 * (F - DEPTH) - 1, bx, bz, 0.045, 1, 1));
+    for (let i = 0; i < 5; i++) treeSpots.push([bx + (rng() - 0.5) * 18, bz + (rng() - 0.5) * 18]);
+  }
   for (const bx of centers)
     for (const bz of centers) {
       const key = bx + "," + bz;
+      if (OLD_TOWN.has(key)) {
+        oldBlock(bx, bz);
+        continue;
+      }
       if (plaza.has(key) || key === "-90,30" || key === "150,-90") continue;
       if (parks.has(key)) {
         parkGeos.push(flatPlane(44, 44, bx, bz, 0.045, 1, 1));
@@ -394,6 +559,22 @@ function buildWorld() {
   bMesh.castShadow = true;
   bMesh.receiveShadow = true;
   scene.add(bMesh);
+  const oMesh = new THREE.Mesh(
+    merge(oldGeos),
+    new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }),
+  );
+  oMesh.castShadow = true;
+  oMesh.receiveShadow = true;
+  scene.add(oMesh);
+  if (oldWin.length) {
+    W.oldWin = new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 0.3,
+      emissive: C("#ffd9a0"),
+      emissiveIntensity: 0,
+    });
+    scene.add(new THREE.Mesh(merge(oldWin), W.oldWin));
+  }
   const dMesh = new THREE.Mesh(
     merge(detail),
     new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 }),
@@ -441,6 +622,13 @@ function buildWorld() {
   }
 
   // ---- street furniture: poles, signs, signals, lamps, crosswalks ----
+  // kaldırım eşyaları 120 m'lik karelere bölünür: ekran dışındaki kareler hiç çizilmez
+  const propTiles = new Map(),
+    propGeos = (x, z) => {
+      const k = Math.floor(x / 120) + "," + Math.floor(z / 120);
+      if (!propTiles.has(k)) propTiles.set(k, []);
+      return propTiles.get(k);
+    };
   const poleGeos = [],
     darkGeos = [],
     lampHeads = [],
@@ -525,6 +713,17 @@ function buildWorld() {
     );
     vquad(boardQB, x, z, fx, fz, w, y0 + y, y0 + y + h, 0.075, boardUV(cell));
     vquad(boardQB, x, z, -fx, -fz, w, y0 + y, y0 + y + h, 0.075, boardUV(7));
+  }
+  // reklam panosu (City Pack modeli) ve önünde bizim reklam resmimiz; (fx,fz) reklamın baktığı yön
+  function billboard(x, z, fx, fz, cell) {
+    const ang = Math.atan2(fx, fz),
+      y0 = hAt(x, z) - 0.2;
+    propGeos(x, z).push(propGeo("billboard", x, y0, z, ang));
+    vquad(boardQB, x, z, fx, fz, 7.9, y0 + 5.5, y0 + 8.95, 0.81, boardUV(cell));
+    // ayak: modelde panonun arkasında, biraz yana kayık
+    const px = x + Math.cos(ang) * 1.2 - fx * 0.95,
+      pz = z - Math.sin(ang) * 1.2 - fz * 0.95;
+    addObs({ t: 1, x: px, z: pz, r: 0.6, top: y0 + 9 }, px - 1, px + 1, pz - 1, pz + 1);
   }
   function signalHead(x, z, fx, fz, grp, y0) {
     const cx = x + fx * 0.18,
@@ -684,6 +883,135 @@ function buildWorld() {
       }
     }
   }
+  // ---- kaldırım eşyaları (City Pack): bank, çöp kutusu, saksı, yangın musluğu, durak ... ----
+  // çarpınca devrilip savrulurlar (tabelalar gibi); otobüs durağı ve çöp konteyneri sağlamdır
+  const STATION_BLOCKS = new Set(["-90,30", "150,-90"]);
+  const near = [];
+  const clear = (x, z, r) => {
+    for (const o of nearObs(x, z, r + 1, near)) {
+      if (o.t === 0) {
+        if (x > o.minX - r && x < o.maxX + r && z > o.minZ - r && z < o.maxZ + r) return false;
+      } else if (Math.hypot(o.x - x, o.z - z) < o.r + r) return false;
+    }
+    return true;
+  };
+  // kırılabilir tek parça eşya; r: çarpışma yarıçapı, soft: metal değil (saksı, bank ...)
+  function prop(key, x, z, ang, r, soft) {
+    const y0 = hAt(x, z);
+    brk(() => {
+      tpush(propGeos(x, z), propGeo(key, x, y0, z, ang));
+      const o = { t: 3, x, z, r, top: y0 + propBase(key).size[1], br: BR };
+      BR.o = o;
+      BR.base = [x, y0, z];
+      BR.soft = soft;
+      addObs(o, x - 1, x + 1, z - 1, z + 1);
+    });
+  }
+  // solid: sağlam kutu engel (eksenlere hizalı)
+  function solidProp(key, x, z, ang, list) {
+    const y0 = hAt(x, z),
+      s = propBase(key).size,
+      across = Math.abs(Math.sin(ang)) > 0.5;
+    list.push(propGeo(key, x, y0, z, ang));
+    const hx = (across ? s[2] : s[0]) / 2,
+      hz = (across ? s[0] : s[2]) / 2;
+    const o = { t: 0, minX: x - hx, maxX: x + hx, minZ: z - hz, maxZ: z + hz, top: y0 + s[1] };
+    addObs(o, o.minX, o.maxX, o.minZ, o.maxZ);
+  }
+  const SIDE_ITEMS = [
+    ["bench", 13, 0.75, 1],
+    ["trashcan", 12, 0.45, 0],
+    ["pot1", 7, 0.35, 1],
+    ["pot2", 6, 0.35, 1],
+    ["planter", 5, 0.8, 1],
+    ["hydrant", 8, 0.25, 0],
+    ["mailbox", 4, 0.35, 0],
+    ["powerbox", 5, 0.3, 0],
+    ["bicycle", 6, 0.8, 0],
+    [null, 34],
+  ];
+  const sideTotal = SIDE_ITEMS.reduce((a, it) => a + it[1], 0);
+  const pickSide = () => {
+    let r = rng() * sideTotal;
+    for (const it of SIDE_ITEMS) if ((r -= it[1]) < 0) return it;
+    return SIDE_ITEMS[SIDE_ITEMS.length - 1];
+  };
+  let shelters = 0;
+  for (const sg of segList) {
+    for (const orient of [0, 1])
+      for (const side of [-1, 1]) {
+        // (px,pz) kaldırımda bir nokta; (fx,fz) yola dönük yön
+        const at = (t, d) => (orient === 0 ? [sg.s + side * d, t] : [t, sg.s + side * d]),
+          fx = orient === 0 ? -side : 0,
+          fz = orient === 0 ? 0 : -side,
+          ang = Math.atan2(fx, fz);
+        const [bx0, bz0] = at((sg.a + sg.b) / 2, 30);
+        if (STATION_BLOCKS.has(blockC(bx0) + "," + blockC(bz0))) continue;
+        if (Math.abs(bx0) > CITY || Math.abs(bz0) > CITY) continue;
+        // otobüs durağı: blok ortasında, arkasında yer varsa
+        if (shelters < 12 && rng() < 0.3) {
+          const tm = (sg.a + sg.b) / 2 + (rng() - 0.5) * 10,
+            [x, z] = at(tm, 7.55);
+          if (clear(x, z, 2.2)) {
+            solidProp("shelter", x, z, ang, propGeos(x, z));
+            const [sx2, sz2] = at(tm + 2.8, 6.75);
+            prop("busSign", sx2, sz2, ang, 0.15, 0);
+            shelters++;
+          }
+        }
+        for (let t = sg.a + 5 + rng() * 3; t < sg.b - 5; t += 5.5 + rng() * 4) {
+          const it = pickSide();
+          if (!it[0]) continue;
+          const [x, z] = at(t, it[0] === "bench" ? 7.95 : 7.8);
+          if (!clear(x, z, it[2] + 0.35)) continue;
+          // bisiklet kaldırıma paralel, öbürleri yola dönük
+          const a =
+            it[0] === "bicycle" ? ang + Math.PI / 2 : ang + (it[0] === "bench" ? 0 : (rng() - 0.5) * 0.3);
+          prop(it[0], x, z, a, it[2], it[3]);
+        }
+        // rögar kapakları şerit ortasında
+        if (rng() < 0.6) {
+          const [x, z] = at(sg.a + 8 + rng() * (sg.b - sg.a - 16), 3);
+          propGeos(x, z).push(propGeo("manhole", x, 0.062, z, rng() * 6.3));
+        }
+      }
+  }
+  W.propStats = { ac: acN, fire: fireN, shelters };
+  // bina aralarında çöp konteynerleri ve poşetler
+  for (const bx of [-150, -90, -30, 30, 90, 150])
+    for (const bz of [-150, -90, -30, 30, 90, 150]) {
+      if (STATION_BLOCKS.has(bx + "," + bz) || rng() < 0.45) continue;
+      const alongX = rng() < 0.5,
+        s = rng() < 0.5 ? -1 : 1,
+        x = alongX ? bx + s * 14 : bx,
+        z = alongX ? bz : bz + s * 14,
+        ang = alongX ? Math.PI / 2 : 0;
+      if (!clear(x, z, 1.3)) continue;
+      solidProp("dumpster", x, z, ang, propGeos(x, z));
+      for (let k = 0; k < 1 + rng() * 3; k++) {
+        const px = x + (alongX ? (rng() - 0.5) * 1.5 : 1.3 + rng() * 0.8),
+          pz = z + (alongX ? 1.3 + rng() * 0.8 : (rng() - 0.5) * 1.5);
+        if (clear(px, pz, 0.35)) prop("trashbag", px, pz, rng() * 6.3, 0.3, 1);
+      }
+    }
+  // dükkân önlerinde ATM: binaya yaslı, sağlam
+  for (let k = 0, tries = 0; k < 10 && tries < 200; tries++) {
+    const sg = segList[(rng() * segList.length) | 0],
+      orient = rng() < 0.5 ? 0 : 1,
+      side = rng() < 0.5 ? -1 : 1,
+      t = sg.a + 6 + rng() * (sg.b - sg.a - 12);
+    // binanın yüzünü bul: kaldırımdan içeri doğru ilk engel
+    let d = 8.6;
+    const pt = (dd) => (orient === 0 ? [sg.s + side * dd, t] : [t, sg.s + side * dd]);
+    while (d < 13 && clear(...pt(d), 0.05)) d += 0.1;
+    if (d >= 13 || d < 8.9) continue;
+    const [x, z] = pt(d - 0.42);
+    if (!clear(x, z, 0.38)) continue;
+    const fx = orient === 0 ? -side : 0,
+      fz = orient === 0 ? 0 : -side;
+    solidProp("atm", x, z, Math.atan2(fx, fz), propGeos(x, z));
+    k++;
+  }
   // loop road signs and billboards
   const LP = loop.pts,
     ln = LP.length;
@@ -742,7 +1070,7 @@ function buildWorld() {
         fx = -(-t[1]) * s * 0.75 - t[0] * 0.66,
         fz = -t[0] * s * 0.75 - t[1] * 0.66,
         l = Math.hypot(fx, fz);
-      board(x, z, fx / l, fz / l, 3 + k, 12, 6, 4.2, 0.18);
+      billboard(x, z, fx / l, fz / l, 3 + k);
       break;
     }
   });
@@ -768,6 +1096,34 @@ function buildWorld() {
     }
   }
   roadSign(-95, 226, 0, -1, 8);
+  // otoyol kenarlarında reklam panoları: düz arazide, tünel ve köprülerden uzakta
+  {
+    let cell = 0;
+    for (const h of HWYS)
+      for (const f of [0.3, 0.7]) {
+        const P = h.pts,
+          j = Math.floor(f * P.length),
+          tx = h.tx[j],
+          tz = h.tz[j],
+          s = cell % 2 ? 1 : -1,
+          x = P[j].x - tz * s * (HW_HALF + 14),
+          z = P[j].z + tx * s * (HW_HALF + 14);
+        if (
+          Math.abs(hAt(P[j].x, P[j].z) - h.ys[j]) > 1.5 ||
+          Math.abs(x) > HALF - 20 ||
+          Math.abs(z) > HALF - 20
+        )
+          continue;
+        if (roadDist(x, z) < 14 || Math.abs(hAt(x, z) - h.ys[j]) > 4) continue;
+        const hd = hwInfo(x, z, HI);
+        if (hd && Math.abs(hd.lat) < HW_HALF + 8) continue;
+        // gelen trafiğe dönük, biraz yola doğru açılı
+        const fx = tz * s * 0.6 - tx * 0.8,
+          fz = -tx * s * 0.6 - tz * 0.8,
+          l = Math.hypot(fx, fz);
+        billboard(x, z, fx / l, fz / l, 3 + (cell++ % 4));
+      }
+  }
   // ---- otoyol structures: median, guard rails, bridge deck & piers, tunnel tubes, portals, gantries ----
   {
     const tunnelHalo = [],
@@ -1199,6 +1555,16 @@ function buildWorld() {
   dk.castShadow = true;
   scene.add(dk);
   darkGeos.mesh = dk;
+  {
+    const pm = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75 });
+    for (const list of propTiles.values()) {
+      const m = new THREE.Mesh(merge(list), pm);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      scene.add(m);
+      list.mesh = m;
+    }
+  }
   lampHeads.mesh = new THREE.Mesh(merge(lampHeads), W.lamp);
   scene.add(lampHeads.mesh);
   const sgm = new THREE.Mesh(

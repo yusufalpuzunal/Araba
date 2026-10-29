@@ -135,22 +135,23 @@ function buildNetwork() {
     }
 }
 // n: how many of each type drive around (phones get a bit fewer to keep the frame rate up)
-// m: Kenney Car Kit modeli (car-assets.js); p: rastgele boyanır. Otobüs ve tır kutu modeldir.
+// q: City Pack modeli (traffic-cars.js), m: Kenney modeli (car-assets.js); p: rastgele boyanır.
+// City Pack araçlarının yüksekliği modelden gelir. Tır kutu modeldir.
 const BOT_TYPES = [
-  { k: "sedan", m: "sedan", p: 1, L: 4.5, W: 1.82, H: 1.48, v: 1, n: 10 },
-  { k: "sport", m: "sedan-sports", p: 1, L: 4.4, W: 1.8, H: 1.32, v: 1.05, n: 4 },
-  { k: "hatch", m: "hatchback-sports", p: 1, L: 4.1, W: 1.76, H: 1.42, v: 1, n: 6 },
-  { k: "taxi", m: "taxi", L: 4.6, W: 1.82, H: 1.6, v: 1, n: 6 },
-  { k: "police", m: "police", L: 4.9, W: 1.86, H: 1.55, v: 1.05, n: 3 },
-  { k: "suv", m: "suv", p: 1, L: 4.7, W: 1.95, H: 1.72, v: 1, n: 4 },
-  { k: "suv2", m: "suv-luxury", p: 1, L: 4.9, W: 1.95, H: 1.72, v: 1, n: 3 },
-  { k: "pickup", m: "truck", p: 1, L: 5.3, W: 1.98, H: 1.8, v: 0.95, n: 5 },
-  { k: "van", m: "van", p: 1, L: 5.0, W: 1.98, H: 2.0, v: 0.95, n: 5 },
+  { k: "sedan", q: "car", p: 1, L: 4.5, W: 1.84, v: 1, n: 10 },
+  { k: "hatch", q: "car2", p: 1, L: 4.0, W: 1.78, v: 1, n: 6 },
+  { k: "sport", q: "sport", p: 1, L: 4.4, W: 1.86, v: 1.05, n: 4 },
+  { k: "sport2", q: "sport2", L: 4.4, W: 1.88, v: 1.05, n: 2 },
+  { k: "taxi", q: "car", paint: "#f2c200", L: 4.6, W: 1.84, v: 1, n: 6 },
+  { k: "police", q: "police", L: 4.8, W: 1.9, v: 1.05, n: 3 },
+  { k: "suv", q: "suv", p: 1, L: 4.7, W: 1.98, v: 1, n: 7 },
+  { k: "pickup", q: "pickup", L: 5.3, W: 2.0, v: 0.95, n: 5 },
+  { k: "van", q: "van", L: 5.0, W: 2.05, v: 0.95, n: 5 },
+  { k: "bus", q: "bus", L: 12, W: 2.55, v: 0.78, n: 5 },
   { k: "delivery", m: "delivery", p: 1, L: 6.2, W: 2.2, H: 2.75, v: 0.85, n: 4 },
   { k: "ambulance", m: "ambulance", L: 6.0, W: 2.15, H: 2.7, v: 1, n: 2 },
   { k: "fire", m: "firetruck", L: 7.6, W: 2.5, H: 3.0, v: 0.85, n: 1 },
   { k: "garbage", m: "garbage-truck", L: 7.4, W: 2.5, H: 3.1, v: 0.75, n: 2 },
-  { k: "bus", L: 12, W: 2.55, H: 3.2, v: 0.78, n: 5 },
   { k: "truck", L: 9.6, W: 2.5, H: 3.7, v: 0.72, n: 6 },
 ];
 const BOT_SCALE = 0.72; // "orta" seviye: ~45 araç
@@ -168,7 +169,6 @@ const BOT_PAINT = [
 ];
 // Kenney modeli (car-assets.js) -> trafik aracı. Gövde t.L/t.W/t.H ölçüsüne esnetilir,
 // tekerlekler ise yuvarlak kalsın diye kendi merkezleri etrafında eşit ölçeklenir.
-const b64 = (s) => Uint8Array.from(atob(s), (ch) => ch.charCodeAt(0)).buffer;
 const KENNEY_CACHE = {};
 function kenneyData(key) {
   if (KENNEY_CACHE[key]) return KENNEY_CACHE[key];
@@ -247,6 +247,10 @@ function kenneyBot(t) {
     }
     g.push(a, b, e);
   }
+  return botGroup(pos, nor, col, grp);
+}
+// gruplanmış üçgenlerden araç: gövde, farlar, stoplar (fren yapınca parlar), tepe lambaları ve gece ışık halkaları
+function botGroup(pos, nor, col, grp) {
   const geo = (idx) => {
     const gg = new THREE.BufferGeometry();
     gg.setAttribute("position", new THREE.BufferAttribute(pos, 3));
@@ -291,7 +295,104 @@ function kenneyBot(t) {
   g.rotation.order = "YXZ";
   return { g, tm };
 }
+// City Pack aracı (traffic-cars.js): boy t.L'ye eşit ölçeklenir, yalnız en t.W'ye daraltılır
+// (tekerlek ekseni x yönünde olduğundan tekerlekler yuvarlak kalır)
+const PACK_CACHE = {};
+function packData(key) {
+  if (PACK_CACHE[key]) return PACK_CACHE[key];
+  const m = CITY_CARS[key];
+  return (PACK_CACHE[key] = {
+    size: m.size,
+    v: new Int16Array(b64(m.v)),
+    n: new Int8Array(b64(m.n)),
+    c: new Uint8Array(b64(m.c)),
+    t: m.t ? new Uint8Array(b64(m.t)) : null,
+    i: m.big ? new Uint32Array(b64(m.i)) : new Uint16Array(b64(m.i)),
+  });
+}
+function packBot(t) {
+  const d = packData(t.q),
+    s = t.L / d.size[2],
+    sx = t.W / d.size[0],
+    H = d.size[1] * s;
+  t.H = H;
+  const paint = t.paint
+      ? C(t.paint)
+      : t.p && rng() < 0.8
+        ? C(BOT_PAINT[(rng() * BOT_PAINT.length) | 0])
+        : null,
+    P = [],
+    N = [],
+    Cl = [],
+    c = new THREE.Color(),
+    nv = d.v.length / 3;
+  for (let i = 0; i < nv; i++) {
+    const nx = d.n[i * 3] / sx,
+      ny = d.n[i * 3 + 1] / s,
+      nz = d.n[i * 3 + 2] / s,
+      nl = Math.hypot(nx, ny, nz) || 1;
+    P.push((d.v[i * 3] / 1000) * sx, (d.v[i * 3 + 1] / 1000) * s, (d.v[i * 3 + 2] / 1000) * s);
+    N.push(nx / nl, ny / nl, nz / nl);
+    if (paint && d.t && d.t[i] === 1) c.copy(paint);
+    else c.setRGB(d.c[i * 3] / 255, d.c[i * 3 + 1] / 255, d.c[i * 3 + 2] / 255).convertSRGBToLinear();
+    Cl.push(c.r, c.g, c.b);
+  }
+  const grp = { body: [], hl: [], hr: [], tl: [], tr: [], pr: [], pb: [] },
+    tag = (v) => (d.t ? d.t[v] : 0);
+  for (let k = 0; k < d.i.length; k += 3) {
+    const a = d.i[k],
+      b = d.i[k + 1],
+      e = d.i[k + 2],
+      tg = tag(a),
+      xm = P[a * 3] + P[b * 3] + P[e * 3],
+      ym = (P[a * 3 + 1] + P[b * 3 + 1] + P[e * 3 + 1]) / 3;
+    let g = grp.body;
+    if (tg === 2) g = xm < 0 ? grp.hl : grp.hr;
+    // polis tepe lambasının kırmızısı stop lambası malzemesiyle boyanmış: üstte kalanlar tepe lambasıdır
+    else if (tg === 3) g = ym > H * 0.85 ? grp.pr : xm < 0 ? grp.tl : grp.tr;
+    else if (tg === 4) g = grp.pb;
+    g.push(a, b, e);
+  }
+  // ek kutular (far/stop yedekleri, taksi tabelası) aynı dizilere eklenir
+  const addBox = (w, h, dd, x, y, z, list, hex) => {
+    const bx = new THREE.BoxGeometry(w, h, dd).translate(x, y, z),
+      o = P.length / 3,
+      bp = bx.attributes.position,
+      bn = bx.attributes.normal,
+      cc = hex ? C(hex) : c.setRGB(1, 1, 1);
+    for (let i = 0; i < bp.count; i++) {
+      P.push(bp.getX(i), bp.getY(i), bp.getZ(i));
+      N.push(bn.getX(i), bn.getY(i), bn.getZ(i));
+      Cl.push(cc.r, cc.g, cc.b);
+    }
+    for (const ix of bx.index.array) list.push(ix + o);
+  };
+  const hL = t.L / 2,
+    hW = t.W / 2;
+  if (!grp.hl.length) {
+    const ly = Math.min(0.95, H * 0.28);
+    for (const sxn of [-1, 1]) {
+      addBox(0.32, 0.14, 0.05, sxn * hW * 0.72, ly, -hL - 0.01, sxn < 0 ? grp.hl : grp.hr);
+      addBox(0.2, 0.3, 0.05, sxn * hW * 0.82, ly + 0.15, hL + 0.01, sxn < 0 ? grp.tl : grp.tr);
+    }
+  }
+  if (t.k === "taxi") {
+    // tavanın en yüksek bölgesinin ortasına "TAKSİ" kutusu
+    let zs = 0,
+      n = 0;
+    for (let i = 0; i < nv; i++)
+      if (P[i * 3 + 1] > H * 0.95) {
+        zs += P[i * 3 + 2];
+        n++;
+      }
+    const z = n ? zs / n : 0;
+    addBox(0.7, 0.2, 0.3, 0, H + 0.1, z, grp.body, "#1a1a1a");
+    addBox(0.6, 0.12, 0.31, 0, H + 0.12, z, grp.body, "#ffd21a");
+  }
+  return botGroup(new Float32Array(P), new Float32Array(N), new Float32Array(Cl), grp);
+}
 function botModel(t) {
+  if (t.q) return packBot(t);
   if (t.m) return kenneyBot(t);
   const body = [],
     head = [],
@@ -320,25 +421,9 @@ function botModel(t) {
   };
   const glass = col("#18222c"),
     dark = col("#232527");
-  let paint = col(BOT_PAINT[(rng() * BOT_PAINT.length) | 0]);
-  const polR = [],
-    polB = [];
-  if (t.k === "bus") {
-    const bp = rng() < 0.5 ? col("#1d6fa8") : col("#e6e1d3");
-    B(W, H - 0.46, L, 0, (H + 0.46) / 2, 0, bp);
-    B(W + 0.02, 0.95, L * 0.84, 0, H - 1.08, 0.35, glass);
-    B(W * 0.93, 1.35, 0.05, 0, H - 1.2, -L / 2 - 0.02, glass);
-    B(W + 0.03, 0.22, L, 0, 1.0, 0, col("#c9302c"));
-    B(W * 0.62, 0.26, 0.04, 0, H - 0.22, -L / 2 - 0.04, col("#ffb030"));
-    B(W * 0.55, 0.3, 2.6, 0, H + 0.15, 0, col("#c7cacd"));
-    for (const dz of [-L / 2 + 1.5, 0]) B(0.03, 2.2, 1.1, W / 2 + 0.01, 1.5, dz, glass);
-    for (const sx of [-1, 1])
-      for (const sz of [-L / 2 + 2.3, L / 2 - 2.6]) whl(sx * (W / 2 - 0.2), sz, 0.5, 0.32);
-    for (const sx of [-1, 1]) {
-      B(0.3, 0.16, 0.05, sx * W * 0.36, 0.85, -L / 2 - 0.03, null, head);
-      B(0.18, 0.3, 0.05, sx * W * 0.42, 1.0, L / 2 + 0.03, null, tail);
-    }
-  } else {
+  const paint = col(BOT_PAINT[(rng() * BOT_PAINT.length) | 0]);
+  // tır: kabin, şasi ve yük kasası
+  {
     const cargo = col(["#e9e9e6", "#c9302c", "#2f6db5", "#e0a020", "#4a6b3a"][(rng() * 5) | 0]);
     B(W, 2.25, 2.3, 0, 1.75, -L / 2 + 1.15, paint);
     B(W * 0.9, 0.85, 0.05, 0, 2.35, -L / 2 - 0.02, glass);
@@ -383,7 +468,6 @@ function botModel(t) {
     emissiveIntensity: 0.4,
   });
   g.add(new THREE.Mesh(merge(tl), tm));
-  if (polR.length) g.add(new THREE.Mesh(merge(polR), BOTMAT.polR), new THREE.Mesh(merge(polB), BOTMAT.polB));
   g.rotation.order = "YXZ";
   return { g, tm };
 }

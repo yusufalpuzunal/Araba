@@ -59,6 +59,7 @@ function setNight(n) {
   if (W.bld) {
     W.bld.emissiveIntensity = n ? 0.9 : 0;
     W.shop.emissiveIntensity = n ? 1.35 : 0.3;
+    if (W.oldWin) W.oldWin.emissiveIntensity = n ? 0.85 : 0;
     W.lamp.emissiveIntensity = n ? 3 : 0;
     W.pools.visible = n;
     W.lampHalos.visible = n;
@@ -579,6 +580,7 @@ function frame(now) {
   }
   updateTunnelLight(dt);
   updateBots(dt);
+  updatePeds(dt);
   updateDebris(dt);
   if (!menuOpen) {
     let nearF = 1e9;
@@ -644,6 +646,7 @@ function start(data) {
     ghosts = loadGhosts();
     spawnCar();
     spawnBots();
+    spawnPeds();
     collectEnvMats();
     const got = new Set(Array.isArray(data.coins) ? data.coins : []);
     for (const cl of collectibles)

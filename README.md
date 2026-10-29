@@ -64,14 +64,19 @@ adresi yazılı. Depo adı ya da kullanıcı adı değişirse bu satırı da gü
 | `js/utils.js` | Matematik, rastgele sayı ve gürültü yardımcıları |
 | `js/world-data.js` | Arazi, vadiler, yollar, **otoyollar** (`makeHighway`), tüneller, zemin sorgusu |
 | `js/renderer.js` | 3B motor, gökyüzü, güneş |
-| `js/textures.js` | Kanvasla çizilen dokular, tabelalar ve levhalar, ışık hâleleri |
-| `js/world.js` | Dünyayı kurar: binalar, dükkanlar, lambalar, köprüler, tüneller, dere, ağaçlar, jetonlar, mini harita |
+| `js/textures.js` | Kanvasla çizilen dokular, tabelalar ve levhalar, ışık hâleleri, gömülü modelleri okuyan yardımcı |
+| `js/city-props.js` | Sokak eşyaları (bank, çöp kutusu, saksı, yangın musluğu, durak, ATM, reklam panosu, yangın merdiveni ...) |
+| `js/city-old.js` | Eski şehir mahallesinin tuğla binaları |
+| `js/world.js` | Dünyayı kurar: binalar, eski şehir, kaldırım eşyaları, dükkanlar, lambalar, köprüler, tüneller, dere, ağaçlar, jetonlar, mini harita |
 | `js/vegetation.js` | Bitki örtüsü: ağaç türleri (çam, ladin, meşe, kavak, huş), çalılar, kayalar, çimen ve çiçekler; rüzgârda salınım |
 | `js/car-body.js` | Gerçekçi araç gövdesi: yan profilden yuvarlatılmış gövde, daralan cam kabin, tavan ve direkler, yere oturan gölge |
 | `js/car-model.js` | **Araç listesi (`CARS`)**, boyalar (`PAINTS`) ve 3B araç modeli |
 | `js/physics.js` | Araç fiziği: süspansiyon, lastik tutuşu, çarpışmalar |
-| `js/car-assets.js` | Trafikteki araçların 3B modelleri (Kenney Car Kit, CC0), oyunun içine gömülü |
+| `js/traffic-cars.js` | Trafikteki arabalar, otobüs ve minibüs modelleri |
+| `js/car-assets.js` | Trafikteki iş araçları: kamyonet, ambulans, itfaiye, çöp kamyonu |
 | `js/traffic.js` | Trafik ağı ve trafikteki araçlar |
+| `js/city-peds.js` | Yaya karakterleri (yürüme, koşma, bekleme animasyonlarıyla) |
+| `js/peds.js` | Kaldırımda yürüyen yayalar: araç yaklaşınca kaçar, hiç ezilmez |
 | `js/audio.js` | Motor, lastik, tünel yankısı, rüzgâr, metal çarpma sesi ve garajdaki açılış müziği (dosyasız, anında sentezlenir) |
 | `js/input.js` | Klavye, dokunmatik ve oyun kolu |
 | `js/race.js` | Zaman yarışı, kontrol kapıları, rekorlar, hayalet araç |
@@ -86,7 +91,7 @@ Dosyalar `index.html` içindeki sırayla yüklenir ve birbirlerinin değişkenle
 `down` yere basma kuvvetini belirler.
 
 **Trafik:** `js/traffic.js` içindeki `BOT_TYPES` listesinde her türün yanındaki `n` o türden kaç araç dolaştığını belirler.
-`m` hangi 3B modelin kullanılacağını, `L`/`W`/`H` aracın boyunu, enini ve yüksekliğini (metre) belirler.
+`q` (City Pack) ya da `m` (Kenney) hangi 3B modelin kullanılacağını, `L`/`W` aracın boyunu ve enini (metre) belirler.
 
 **Yeni boya:** Aynı dosyadaki `PAINTS` listesine `["Adı", "#renkkodu"]` ekle.
 
@@ -98,5 +103,23 @@ Oyuncu araçlarının tasarımları, markalar ve dükkanlar bu oyun için uyduru
 
 ## Teşekkür
 
-Trafikteki araç modelleri [Kenney](https://www.kenney.nl) tarafından hazırlanan **Car Kit** paketinden alınmıştır.
-Paket [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) lisanslıdır (kamu malı): özgürce kullanılabilir.
+Oyundaki hazır 3B modeller, aşağıdaki sanatçıların ücretsiz paylaştığı çalışmalardır. Modeller oyunun içine
+gömülürken küçültüldü, ölçeklendi ve bazılarının rengi değiştirildi.
+
+**Kamu malı (CC0 1.0), özgürce kullanılabilir:**
+
+- [Quaternius](https://quaternius.com): trafikteki arabalar (sedan, hatchback, iki spor araba, SUV, polis, pikap),
+  büyük eski bina, çöp konteyneri ve yaya karakterleri (erkek, iki kadın)
+- [Kenney](https://www.kenney.nl) Car Kit: kamyonet, ambulans, itfaiye, çöp kamyonu
+
+**Yazar adı belirtilerek kullanılabilir ([CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/)):**
+
+- J-Toastie: eski şehir binaları (kırmızı, yeşil, kahverengi, köşe binası, pizzacı), posta kutusu, rögar kapağı,
+  yangın merdiveni, çatı çıkışı, ATM, elektrik panosu, çiçeklik
+- Poly by Google: yangın musluğu, bisiklet, reklam panosu, otobüs, minibüs
+- Zsky: saksılar, çöp kutusu, otobüs durağı
+- dook: otobüs durağı tabelası
+- Danni Bittman: bank
+- Jens Kull: çöp poşeti
+
+Modellerin çoğu Poly Pizza'daki [City Pack](https://poly.pizza/bundle/City-Pack-kJqRAIGsw0) paketinden alınmıştır.
